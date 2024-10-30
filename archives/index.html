@@ -5,11 +5,11 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
-<title>Posts | Yang2KF&#39;s blog</title>
+<title>Archive | Yang2KF&#39;s blog</title>
 <meta name="keywords" content="">
-<meta name="description" content="Posts - Yang2KF&#39;s blog">
+<meta name="description" content="archives">
 <meta name="author" content="">
-<link rel="canonical" href="http://localhost:44916/posts/">
+<link rel="canonical" href="http://localhost:44916/archives/">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.fc220c15db4aef0318bbf30adc45d33d4d7c88deff3238b23eb255afdc472ca6.css" integrity="sha256-/CIMFdtK7wMYu/MK3EXTPU18iN7/MjiyPrJVr9xHLKY=" rel="preload stylesheet" as="style">
 <link rel="icon" href="http://localhost:44916/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="http://localhost:44916/favicon-16x16.png">
@@ -18,8 +18,7 @@
 <link rel="mask-icon" href="http://localhost:44916/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" type="application/rss+xml" href="http://localhost:44916/posts/index.xml">
-<link rel="alternate" hreflang="en" href="http://localhost:44916/posts/">
+<link rel="alternate" hreflang="en" href="http://localhost:44916/archives/">
 <noscript>
     <style>
         #theme-toggle,
@@ -56,14 +55,16 @@
         }
 
     </style>
-</noscript><meta property="og:title" content="Posts" />
-<meta property="og:description" content="" />
-<meta property="og:type" content="website" />
-<meta property="og:url" content="http://localhost:44916/posts/" />
+</noscript><meta property="og:title" content="Archive" />
+<meta property="og:description" content="archives" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://localhost:44916/archives/" /><meta property="article:section" content="" />
+
+
 
 <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Posts"/>
-<meta name="twitter:description" content=""/>
+<meta name="twitter:title" content="Archive"/>
+<meta name="twitter:description" content="archives"/>
 
 
 <script type="application/ld+json">
@@ -74,10 +75,39 @@
     {
       "@type": "ListItem",
       "position":  1 ,
-      "name": "Posts",
-      "item": "http://localhost:44916/posts/"
+      "name": "Archive",
+      "item": "http://localhost:44916/archives/"
     }
   ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Archive",
+  "name": "Archive",
+  "description": "archives",
+  "keywords": [
+    
+  ],
+  "articleBody": "",
+  "wordCount" : "0",
+  "inLanguage": "en",
+  "datePublished": "0001-01-01T00:00:00Z",
+  "dateModified": "0001-01-01T00:00:00Z",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:44916/archives/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Yang2KF's blog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:44916/favicon.ico"
+    }
+  }
 }
 </script>
 </head>
@@ -139,7 +169,7 @@
             </li>
             <li>
                 <a href="http://localhost:44916/archives/" title="Archives">
-                    <span>Archives</span>
+                    <span class="active">Archives</span>
                 </a>
             </li>
             <li>
@@ -150,40 +180,33 @@
         </ul>
     </nav>
 </header>
-<main class="main"> 
-<header class="page-header"><div class="breadcrumbs"><a href="http://localhost:44916/">Home</a></div>
+<main class="main">
+
+<header class="page-header">
   <h1>
-    Posts
+    Archive
   </h1>
 </header>
-
-<article class="post-entry"> 
-  <header class="entry-header">
-    <h2 class="entry-hint-parent">Hugo &#43; Github pages 搭建博客
-    </h2>
-  </header>
-  <div class="entry-content">
-    <p>本文默认已有一定的git与命令行基础
-配置环境: Ubuntu 22.04.5 LTS
-安装Hugo 使用Snap包管理器（安装方法有多种，可自行选择，此处选择较为简便的方式）
-1 sudo snap install hugo 查看hugo版本
-1 hugo version 如果显示找不到该命令，则在~/.bashrc设置一下环境变量即可
-1 export PATH=$PATH:/snap/bin 创建站点 1 hugo new site Start 执行命令之后，进入你所创建的站点目录（下文统称此目录为根目录），会看见像这样的文件结构
-├── archetypes
-│ └── default.md #生成博文的模板
-├── assets #存放 css、js 文件
-├── content #存放markdown博文
-├── data #存放 Hugo 处理的数据
-├── hugo.toml #Hugo 配置文件
-├── i18n #翻译文件
-├── layouts #存放html文件
-├── static #静态资源文件
-└── themes #存放不同主题
-...</p>
+<div class="archive-year">
+  <h2 class="archive-year-header" id="2024">
+    <a class="archive-header-link" href="#2024">2024</a>
+    <sup class="archive-count">&nbsp;1</sup>
+  </h2>
+  <div class="archive-month">
+    <h3 class="archive-month-header" id="2024-October">
+      <a class="archive-header-link" href="#2024-October">October</a>
+      <sup class="archive-count">&nbsp;1</sup>
+    </h3>
+    <div class="archive-posts">
+      <div class="archive-entry">
+        <h3 class="archive-entry-title entry-hint-parent">Hugo + Github pages 搭建博客
+        </h3>
+        <div class="archive-meta"><span title='2024-10-30 17:32:00 +0800 CST'>October 30, 2024</span>&nbsp;·&nbsp;1 min</div>
+        <a class="entry-link" aria-label="post link to Hugo &#43; Github pages 搭建博客" href="http://localhost:44916/posts/hugo-githubpages/"></a>
+      </div>
+    </div>
   </div>
-  <footer class="entry-footer"><span title='2024-10-30 17:32:00 +0800 CST'>October 30, 2024</span>&nbsp;·&nbsp;1 min</footer>
-  <a class="entry-link" aria-label="post link to Hugo &#43; Github pages 搭建博客" href="http://localhost:44916/posts/hugo-githubpages/"></a>
-</article>
+</div>
     </main>
     
 <footer class="footer">

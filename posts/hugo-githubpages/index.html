@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=44916&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>Hugo &#43; Github pages 搭建博客 | Yang2KF&#39;s blog</title>
+<meta name="keywords" content="">
+<meta name="description" content="本文默认已有一定的git与命令行基础
+配置环境: Ubuntu 22.04.5 LTS
+安装Hugo
+使用Snap包管理器（安装方法有多种，可自行选择，此处选择较为简便的方式）
+
+
+1
+
+
+sudo snap install hugo
+
+
+查看hugo版本
+
+
+1
+
+
+hugo version
+
+
+
+
+如果显示找不到该命令，则在~/.bashrc设置一下环境变量即可
+
+
+1
+
+
+export PATH=$PATH:/snap/bin
+
+
+创建站点
+
+
+1
+
+
+hugo new site Start
+
+
+执行命令之后，进入你所创建的站点目录（下文统称此目录为根目录），会看见像这样的文件结构
+├── archetypes
+│   └── default.md      #生成博文的模板
+├── assets              #存放 css、js 文件
+├── content             #存放markdown博文
+├── data                #存放 Hugo 处理的数据
+├── hugo.toml           #Hugo 配置文件
+├── i18n                #翻译文件
+├── layouts             #存放html文件
+├── static              #静态资源文件
+└── themes              #存放不同主题">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:44916/posts/hugo-githubpages/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.fc220c15db4aef0318bbf30adc45d33d4d7c88deff3238b23eb255afdc472ca6.css" integrity="sha256-/CIMFdtK7wMYu/MK3EXTPU18iN7/MjiyPrJVr9xHLKY=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:44916/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:44916/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:44916/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:44916/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:44916/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:44916/posts/hugo-githubpages/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="Hugo &#43; Github pages 搭建博客" />
+<meta property="og:description" content="本文默认已有一定的git与命令行基础
+配置环境: Ubuntu 22.04.5 LTS
+安装Hugo
+使用Snap包管理器（安装方法有多种，可自行选择，此处选择较为简便的方式）
+
+
+1
+
+
+sudo snap install hugo
+
+
+查看hugo版本
+
+
+1
+
+
+hugo version
+
+
+
+
+如果显示找不到该命令，则在~/.bashrc设置一下环境变量即可
+
+
+1
+
+
+export PATH=$PATH:/snap/bin
+
+
+创建站点
+
+
+1
+
+
+hugo new site Start
+
+
+执行命令之后，进入你所创建的站点目录（下文统称此目录为根目录），会看见像这样的文件结构
+├── archetypes
+│   └── default.md      #生成博文的模板
+├── assets              #存放 css、js 文件
+├── content             #存放markdown博文
+├── data                #存放 Hugo 处理的数据
+├── hugo.toml           #Hugo 配置文件
+├── i18n                #翻译文件
+├── layouts             #存放html文件
+├── static              #静态资源文件
+└── themes              #存放不同主题" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://localhost:44916/posts/hugo-githubpages/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-10-30T17:32:00+08:00" />
+<meta property="article:modified_time" content="2024-10-30T17:32:00+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Hugo &#43; Github pages 搭建博客"/>
+<meta name="twitter:description" content="本文默认已有一定的git与命令行基础
+配置环境: Ubuntu 22.04.5 LTS
+安装Hugo
+使用Snap包管理器（安装方法有多种，可自行选择，此处选择较为简便的方式）
+
+
+1
+
+
+sudo snap install hugo
+
+
+查看hugo版本
+
+
+1
+
+
+hugo version
+
+
+
+
+如果显示找不到该命令，则在~/.bashrc设置一下环境变量即可
+
+
+1
+
+
+export PATH=$PATH:/snap/bin
+
+
+创建站点
+
+
+1
+
+
+hugo new site Start
+
+
+执行命令之后，进入你所创建的站点目录（下文统称此目录为根目录），会看见像这样的文件结构
+├── archetypes
+│   └── default.md      #生成博文的模板
+├── assets              #存放 css、js 文件
+├── content             #存放markdown博文
+├── data                #存放 Hugo 处理的数据
+├── hugo.toml           #Hugo 配置文件
+├── i18n                #翻译文件
+├── layouts             #存放html文件
+├── static              #静态资源文件
+└── themes              #存放不同主题"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:44916/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "Hugo + Github pages 搭建博客",
+      "item": "http://localhost:44916/posts/hugo-githubpages/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Hugo + Github pages 搭建博客",
+  "name": "Hugo \u002b Github pages 搭建博客",
+  "description": "本文默认已有一定的git与命令行基础\n配置环境: Ubuntu 22.04.5 LTS\n安装Hugo 使用Snap包管理器（安装方法有多种，可自行选择，此处选择较为简便的方式）\n1 sudo snap install hugo 查看hugo版本\n1 hugo version 如果显示找不到该命令，则在~/.bashrc设置一下环境变量即可\n1 export PATH=$PATH:/snap/bin 创建站点 1 hugo new site Start 执行命令之后，进入你所创建的站点目录（下文统称此目录为根目录），会看见像这样的文件结构\n├── archetypes\n│ └── default.md #生成博文的模板\n├── assets #存放 css、js 文件\n├── content #存放markdown博文\n├── data #存放 Hugo 处理的数据\n├── hugo.toml #Hugo 配置文件\n├── i18n #翻译文件\n├── layouts #存放html文件\n├── static #静态资源文件\n└── themes #存放不同主题\n",
+  "keywords": [
+    
+  ],
+  "articleBody": "本文默认已有一定的git与命令行基础\n配置环境: Ubuntu 22.04.5 LTS\n安装Hugo 使用Snap包管理器（安装方法有多种，可自行选择，此处选择较为简便的方式）\n1 sudo snap install hugo 查看hugo版本\n1 hugo version 如果显示找不到该命令，则在~/.bashrc设置一下环境变量即可\n1 export PATH=$PATH:/snap/bin 创建站点 1 hugo new site Start 执行命令之后，进入你所创建的站点目录（下文统称此目录为根目录），会看见像这样的文件结构\n├── archetypes\n│ └── default.md #生成博文的模板\n├── assets #存放 css、js 文件\n├── content #存放markdown博文\n├── data #存放 Hugo 处理的数据\n├── hugo.toml #Hugo 配置文件\n├── i18n #翻译文件\n├── layouts #存放html文件\n├── static #静态资源文件\n└── themes #存放不同主题\n比较主要的文件有\nassets: 可自定义css，js layouts: 可自定义html 选择合适的主题 为避免本地仓库与远程仓库分支名称不一致的冲突，建议将git主分支名称设置为main，与GitHub默认主分支名称保持一致\n首先将根目录初始化为本地git仓库\n1 git init 访问官方主题网站：https://themes.gohugo.io/\n选择你所喜欢的主题，不同主题安装方式可能略有不同，请参照主题主页的文档，此处以PaperMod为例\n在根目录下执行该命令，即将该仓库作为本地仓库的子模块\n1 git submodule add --depth=1 https://github.com/adityatelange/hugo-PaperMod.git themes/PaperMod 然后在hugo.yml里添加主题即可（默认配置文件格式为toml，但yml更为直观）\n1 theme: 'PaperMod' 最后建议将此本地仓库push至github进行版本管理，即作为我们博客的源代码\n创建博文 顺利完成上述操作后，可以通过hugo new命令创建新的博文\n1 hugo new posts/Test.md 这个命令会在content目录下生成posts文件夹，并在posts文件夹下生成Test.md文件\n1 2 3 4 5 +++ date = '2024-10-30T19:25:01+08:00' draft = true title = 'Test' +++ 该文件自动生成的内容为博文的front matter，可以通过修改archetypes中的default.md自行配置front matter\n该文件中的draft为草稿，只有设置为false时才会将博文正式发布\n发布博文 1 hugo server 使用此命令即可启动hugo服务，然后访问http://localhost:1313/即可看见所编写的博文\n1 hugo server -D 还可以通过此命令访问尚处于草稿状态的博文\n配置Github Pages 在github创建一个新仓库\n仓库名称必须为 用户名.github.io，仓库访问权限必须为public\n之后在你的根目录下执行该命令\n1 hugo 成功后会构建一个public目录，该目录即为根据hugo框架构建的静态网页文件，需要将此文件部署到github上\n进入该文件夹\n1 cd public 初始化为本地git仓库\n1 git init 将你所创建的仓库添加为远程仓库\n1 git remote add origin git@github.com:Yang2KF/Yang2KF.github.io.git 将内容添加到暂存区并提交\n1 2 git add . git commit -m \"first commit\" 推送到远程仓库\n1 git push -u origin main 此仓库即可作为存放所生成的静态网页的仓库，与博客源代码仓库区分开来\n最后再修改hugo.yml，将url替换成你的仓库名称即可进行访问\n1 baseURL: 'https://Yang2KF.github.io' ",
+  "wordCount" : "173",
+  "inLanguage": "en",
+  "datePublished": "2024-10-30T17:32:00+08:00",
+  "dateModified": "2024-10-30T17:32:00+08:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:44916/posts/hugo-githubpages/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Yang2KF's blog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:44916/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:44916/" accesskey="h" title="Yang2KF&#39;s blog (Alt + H)">Yang2KF&#39;s blog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:44916/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:44916/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:44916/categories/" title="Categories">
+                    <span>Categories</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:44916/archives/" title="Archives">
+                    <span>Archives</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:44916/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:44916/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:44916/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      Hugo &#43; Github pages 搭建博客
+    </h1>
+    <div class="post-meta"><span title='2024-10-30 17:32:00 +0800 CST'>October 30, 2024</span>&nbsp;·&nbsp;1 min
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#%e5%ae%89%e8%a3%85hugo" aria-label="安装Hugo">安装Hugo</a></li>
+                <li>
+                    <a href="#%e5%88%9b%e5%bb%ba%e7%ab%99%e7%82%b9" aria-label="创建站点">创建站点</a></li>
+                <li>
+                    <a href="#%e9%80%89%e6%8b%a9%e5%90%88%e9%80%82%e7%9a%84%e4%b8%bb%e9%a2%98" aria-label="选择合适的主题">选择合适的主题</a></li>
+                <li>
+                    <a href="#%e5%88%9b%e5%bb%ba%e5%8d%9a%e6%96%87" aria-label="创建博文">创建博文</a></li>
+                <li>
+                    <a href="#%e5%8f%91%e5%b8%83%e5%8d%9a%e6%96%87" aria-label="发布博文">发布博文</a></li>
+                <li>
+                    <a href="#%e9%85%8d%e7%bd%aegithub-pages" aria-label="配置Github Pages">配置Github Pages</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>本文默认已有一定的git与命令行基础<br>
+配置环境: Ubuntu 22.04.5 LTS</p>
+<h3 id="安装hugo">安装Hugo<a hidden class="anchor" aria-hidden="true" href="#安装hugo">#</a></h3>
+<p>使用Snap包管理器（安装方法有多种，可自行选择，此处选择较为简便的方式）</p>
+<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo snap install hugo
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>查看hugo版本</p>
+<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>hugo version
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><img loading="lazy" src="images/1.png" alt="image-1"  />
+</p>
+<p>如果显示找不到该命令，则在<code>~/.bashrc</code>设置一下环境变量即可</p>
+<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#fff;font-weight:bold">export</span> PATH=$PATH:/snap/bin
+</span></span></code></pre></td></tr></table>
+</div>
+</div><h3 id="创建站点">创建站点<a hidden class="anchor" aria-hidden="true" href="#创建站点">#</a></h3>
+<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>hugo new site Start
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>执行命令之后，进入你所创建的站点目录（下文统称此目录为<strong>根目录</strong>），会看见像这样的文件结构</p>
+<p>├── archetypes<br>
+│   └── default.md      #生成博文的模板<br>
+├── assets              #存放 css、js 文件<br>
+├── content             #存放markdown博文<br>
+├── data                #存放 Hugo 处理的数据<br>
+├── hugo.toml           #Hugo 配置文件<br>
+├── i18n                #翻译文件<br>
+├── layouts             #存放html文件<br>
+├── static              #静态资源文件<br>
+└── themes              #存放不同主题</p>
+<p>比较主要的文件有</p>
+<ul>
+<li> assets: 可自定义css，js </li>
+<li> layouts: 可自定义html </li>
+</ul>
+<h3 id="选择合适的主题">选择合适的主题<a hidden class="anchor" aria-hidden="true" href="#选择合适的主题">#</a></h3>
+<p>为避免本地仓库与远程仓库分支名称不一致的冲突，建议将git主分支名称设置为<code>main</code>，与GitHub默认主分支名称保持一致</p>
+<p>首先将根目录初始化为本地git仓库</p>
+<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git init
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>访问官方主题网站：<a href="https://themes.gohugo.io/">https://themes.gohugo.io/</a><br>
+选择你所喜欢的主题，不同主题安装方式可能略有不同，请参照主题主页的文档，此处以<strong>PaperMod</strong>为例</p>
+<p>在根目录下执行该命令，即将该仓库作为本地仓库的子模块</p>
+<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git submodule add --depth=<span style="color:#ff0;font-weight:bold">1</span> https://github.com/adityatelange/hugo-PaperMod.git themes/PaperMod
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>然后在<code>hugo.yml</code>里添加主题即可（默认配置文件格式为toml，但yml更为直观）</p>
+<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="font-weight:bold">theme</span>: <span style="color:#0ff;font-weight:bold">&#39;PaperMod&#39;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>最后建议将此本地仓库push至github进行版本管理，即作为我们博客的源代码</p>
+<h3 id="创建博文">创建博文<a hidden class="anchor" aria-hidden="true" href="#创建博文">#</a></h3>
+<p>顺利完成上述操作后，可以通过<code>hugo new</code>命令创建新的博文</p>
+<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>hugo new posts/Test.md
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>这个命令会在<code>content</code>目录下生成<code>posts</code>文件夹，并在<code>posts</code>文件夹下生成<code>Test.md</code>文件</p>
+<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">5
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-markdown" data-lang="markdown"><span style="display:flex;"><span>+++
+</span></span><span style="display:flex;"><span>date = &#39;2024-10-30T19:25:01+08:00&#39;
+</span></span><span style="display:flex;"><span>draft = true
+</span></span><span style="display:flex;"><span>title = &#39;Test&#39;
+</span></span><span style="display:flex;"><span>+++
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>该文件自动生成的内容为博文的<code>front matter</code>，可以通过修改<code>archetypes</code>中的<code>default.md</code>自行配置<code>front matter</code></p>
+<p>该文件中的<code>draft</code>为草稿，只有设置为<code>false</code>时才会将博文正式发布</p>
+<h3 id="发布博文">发布博文<a hidden class="anchor" aria-hidden="true" href="#发布博文">#</a></h3>
+<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>hugo server
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>使用此命令即可启动hugo服务，然后访问<a href="http://localhost:1313/">http://localhost:1313/</a>即可看见所编写的博文</p>
+<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>hugo server -D
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>还可以通过此命令访问尚处于草稿状态的博文</p>
+<h3 id="配置github-pages">配置Github Pages<a hidden class="anchor" aria-hidden="true" href="#配置github-pages">#</a></h3>
+<p>在github创建一个新仓库</p>
+<p><img loading="lazy" src="images/2.png" alt="image-2"  />
+</p>
+<p>仓库名称必须为 <strong>用户名.github.io</strong>，仓库访问权限必须为<strong>public</strong></p>
+<p>之后在你的根目录下执行该命令</p>
+<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>hugo
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>成功后会构建一个<code>public</code>目录，该目录即为根据<code>hugo</code>框架构建的静态网页文件，需要将此文件部署到github上</p>
+<p>进入该文件夹</p>
+<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#fff;font-weight:bold">cd</span> public
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>初始化为本地git仓库</p>
+<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git init
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>将你所创建的仓库添加为远程仓库</p>
+<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git remote add origin git@github.com:Yang2KF/Yang2KF.github.io.git
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>将内容添加到暂存区并提交</p>
+<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git add .
+</span></span><span style="display:flex;"><span>git commit -m <span style="color:#0ff;font-weight:bold">&#34;first commit&#34;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>推送到远程仓库</p>
+<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>git push -u origin main
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p>此仓库即可作为存放所生成的静态网页的仓库，与博客源代码仓库区分开来</p>
+<p>最后再修改<code>hugo.yml</code>，将url替换成你的仓库名称即可进行访问</p>
+<div class="highlight"><div style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#727272">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#e5e5e5;background-color:#000;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-yaml" data-lang="yaml"><span style="display:flex;"><span><span style="font-weight:bold">baseURL</span>: <span style="color:#0ff;font-weight:bold">&#39;https://Yang2KF.github.io&#39;</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="http://localhost:44916/">Yang2KF&#39;s blog</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
