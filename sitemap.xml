@@ -2,21 +2,21 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:44916/posts/hugo-githubpages/</loc>
+    <loc>https://yang2kf.github.io/posts/hugo-githubpages/</loc>
     <lastmod>2024-10-30T17:32:00+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:44916/posts/</loc>
+    <loc>https://yang2kf.github.io/posts/</loc>
     <lastmod>2024-10-30T17:32:00+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:44916/</loc>
+    <loc>https://yang2kf.github.io/</loc>
     <lastmod>2024-10-30T17:32:00+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:44916/archives/</loc>
+    <loc>https://yang2kf.github.io/archives/</loc>
   </url><url>
-    <loc>http://localhost:44916/categories/</loc>
+    <loc>https://yang2kf.github.io/categories/</loc>
   </url><url>
-    <loc>http://localhost:44916/search/</loc>
+    <loc>https://yang2kf.github.io/search/</loc>
   </url><url>
-    <loc>http://localhost:44916/tags/</loc>
+    <loc>https://yang2kf.github.io/tags/</loc>
   </url>
 </urlset>

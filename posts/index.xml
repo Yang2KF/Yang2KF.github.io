@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Posts on Yang2KF&#39;s blog</title>
-    <link>http://localhost:44916/posts/</link>
+    <link>https://yang2kf.github.io/posts/</link>
     <description>Recent content in Posts on Yang2KF&#39;s blog</description>
     <generator>Hugo -- 0.136.5</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 30 Oct 2024 17:32:00 +0800</lastBuildDate>
-    <atom:link href="http://localhost:44916/posts/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://yang2kf.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Hugo &#43; Github pages 搭建博客</title>
-      <link>http://localhost:44916/posts/hugo-githubpages/</link>
+      <link>https://yang2kf.github.io/posts/hugo-githubpages/</link>
       <pubDate>Wed, 30 Oct 2024 17:32:00 +0800</pubDate>
-      <guid>http://localhost:44916/posts/hugo-githubpages/</guid>
+      <guid>https://yang2kf.github.io/posts/hugo-githubpages/</guid>
       <description>&lt;p&gt;本文默认已有一定的git与命令行基础&lt;br&gt;
 配置环境: Ubuntu 22.04.5 LTS&lt;/p&gt;
 &lt;h3 id=&#34;安装hugo&#34;&gt;安装Hugo&lt;/h3&gt;
