@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>ICS PA 1-1 基础设施 | Yang2KF&#39;s blog</title>
+<meta name="keywords" content="">
+<meta name="description" content="本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。
+单步执行
+根据文档中提到的字符串处理函数即可，此处使用strtok(), sscanf() 进行处理
+static int cmd_si(char *args) {
+    /*extract the first argument*/
+    char *arg = strtok(NULL, &#34; &#34;);
+
+    /*the default is 1*/
+    if (arg == NULL) {
+        cpu_exec(1);
+    } else {
+        int steps;
+        /*convert to int*/
+        sscanf(arg, &#34;%d&#34;, &amp;steps);
+        cpu_exec(steps);
+    }
+    return 0;
+}
+strtok()的第一个参数为所处理的字符串str，第二个参数为处理的界限delimiting byte
+在sdb_mainloop()函数中，进行了第一次调用，指明了处理的字符串str
+char *cmd = strtok(str, &#34; &#34;);
+在后续的调用中，因为所处理的都是同一个字符串，第一个参数str则必须为NULL
+sscanf()则将char *类型的参数转换为int，便于函数cpu_exec()执行
+打印寄存器
+仿照gdb格式同时打印十六进制和十进制的地址值，按照手册提示调用isa_reg_display()即可
+static int cmd_info(char *args) {
+    char *arg = strtok(NULL, &#34; &#34;);
+    if (arg == NULL) {
+        printf(&#34;No args.\n&#34;);
+    } else if (strcmp(arg, &#34;r&#34;) == 0) {
+        isa_reg_display();
+    } 
+    return 0;
+}
+其中isa_reg_display()实现为
+void isa_reg_display() {
+    int length = sizeof(regs) / sizeof(regs[0]);
+    for (int i = 0; i &lt; length; i&#43;&#43;) {
+        printf(&#34;%s     0x%x     %d\n&#34;, regs[i], cpu.gpr[i], cpu.gpr[i]);
+    }
+}
+变量cpu的类型为CPU_state，在 /nemu/include/memory/isa.h可找到">
+<meta name="author" content="">
+<link rel="canonical" href="https://Yang2KF.github.io/posts/ics_pa_1-1/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.778d247b40839112d8aa3a44faf102781aba3c65b190397f9249ba63c14a687f.css" integrity="sha256-d40ke0CDkRLYqjpE&#43;vECeBq6PGWxkDl/kkm6Y8FKaH8=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://Yang2KF.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://Yang2KF.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://Yang2KF.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://Yang2KF.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://Yang2KF.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://Yang2KF.github.io/posts/ics_pa_1-1/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="ICS PA 1-1 基础设施" />
+<meta property="og:description" content="本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。
+单步执行
+根据文档中提到的字符串处理函数即可，此处使用strtok(), sscanf() 进行处理
+static int cmd_si(char *args) {
+    /*extract the first argument*/
+    char *arg = strtok(NULL, &#34; &#34;);
+
+    /*the default is 1*/
+    if (arg == NULL) {
+        cpu_exec(1);
+    } else {
+        int steps;
+        /*convert to int*/
+        sscanf(arg, &#34;%d&#34;, &amp;steps);
+        cpu_exec(steps);
+    }
+    return 0;
+}
+strtok()的第一个参数为所处理的字符串str，第二个参数为处理的界限delimiting byte
+在sdb_mainloop()函数中，进行了第一次调用，指明了处理的字符串str
+char *cmd = strtok(str, &#34; &#34;);
+在后续的调用中，因为所处理的都是同一个字符串，第一个参数str则必须为NULL
+sscanf()则将char *类型的参数转换为int，便于函数cpu_exec()执行
+打印寄存器
+仿照gdb格式同时打印十六进制和十进制的地址值，按照手册提示调用isa_reg_display()即可
+static int cmd_info(char *args) {
+    char *arg = strtok(NULL, &#34; &#34;);
+    if (arg == NULL) {
+        printf(&#34;No args.\n&#34;);
+    } else if (strcmp(arg, &#34;r&#34;) == 0) {
+        isa_reg_display();
+    } 
+    return 0;
+}
+其中isa_reg_display()实现为
+void isa_reg_display() {
+    int length = sizeof(regs) / sizeof(regs[0]);
+    for (int i = 0; i &lt; length; i&#43;&#43;) {
+        printf(&#34;%s     0x%x     %d\n&#34;, regs[i], cpu.gpr[i], cpu.gpr[i]);
+    }
+}
+变量cpu的类型为CPU_state，在 /nemu/include/memory/isa.h可找到" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Yang2KF.github.io/posts/ics_pa_1-1/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-11-01T22:33:12+08:00" />
+<meta property="article:modified_time" content="2024-11-01T22:33:12+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="ICS PA 1-1 基础设施"/>
+<meta name="twitter:description" content="本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。
+单步执行
+根据文档中提到的字符串处理函数即可，此处使用strtok(), sscanf() 进行处理
+static int cmd_si(char *args) {
+    /*extract the first argument*/
+    char *arg = strtok(NULL, &#34; &#34;);
+
+    /*the default is 1*/
+    if (arg == NULL) {
+        cpu_exec(1);
+    } else {
+        int steps;
+        /*convert to int*/
+        sscanf(arg, &#34;%d&#34;, &amp;steps);
+        cpu_exec(steps);
+    }
+    return 0;
+}
+strtok()的第一个参数为所处理的字符串str，第二个参数为处理的界限delimiting byte
+在sdb_mainloop()函数中，进行了第一次调用，指明了处理的字符串str
+char *cmd = strtok(str, &#34; &#34;);
+在后续的调用中，因为所处理的都是同一个字符串，第一个参数str则必须为NULL
+sscanf()则将char *类型的参数转换为int，便于函数cpu_exec()执行
+打印寄存器
+仿照gdb格式同时打印十六进制和十进制的地址值，按照手册提示调用isa_reg_display()即可
+static int cmd_info(char *args) {
+    char *arg = strtok(NULL, &#34; &#34;);
+    if (arg == NULL) {
+        printf(&#34;No args.\n&#34;);
+    } else if (strcmp(arg, &#34;r&#34;) == 0) {
+        isa_reg_display();
+    } 
+    return 0;
+}
+其中isa_reg_display()实现为
+void isa_reg_display() {
+    int length = sizeof(regs) / sizeof(regs[0]);
+    for (int i = 0; i &lt; length; i&#43;&#43;) {
+        printf(&#34;%s     0x%x     %d\n&#34;, regs[i], cpu.gpr[i], cpu.gpr[i]);
+    }
+}
+变量cpu的类型为CPU_state，在 /nemu/include/memory/isa.h可找到"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://Yang2KF.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "ICS PA 1-1 基础设施",
+      "item": "https://Yang2KF.github.io/posts/ics_pa_1-1/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ICS PA 1-1 基础设施",
+  "name": "ICS PA 1-1 基础设施",
+  "description": "本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。\n单步执行 根据文档中提到的字符串处理函数即可，此处使用strtok(), sscanf() 进行处理\nstatic int cmd_si(char *args) { /*extract the first argument*/ char *arg = strtok(NULL, \u0026#34; \u0026#34;); /*the default is 1*/ if (arg == NULL) { cpu_exec(1); } else { int steps; /*convert to int*/ sscanf(arg, \u0026#34;%d\u0026#34;, \u0026amp;steps); cpu_exec(steps); } return 0; } strtok()的第一个参数为所处理的字符串str，第二个参数为处理的界限delimiting byte\n在sdb_mainloop()函数中，进行了第一次调用，指明了处理的字符串str\nchar *cmd = strtok(str, \u0026#34; \u0026#34;); 在后续的调用中，因为所处理的都是同一个字符串，第一个参数str则必须为NULL\nsscanf()则将char *类型的参数转换为int，便于函数cpu_exec()执行\n打印寄存器 仿照gdb格式同时打印十六进制和十进制的地址值，按照手册提示调用isa_reg_display()即可\nstatic int cmd_info(char *args) { char *arg = strtok(NULL, \u0026#34; \u0026#34;); if (arg == NULL) { printf(\u0026#34;No args.\\n\u0026#34;); } else if (strcmp(arg, \u0026#34;r\u0026#34;) == 0) { isa_reg_display(); } return 0; } 其中isa_reg_display()实现为\nvoid isa_reg_display() { int length = sizeof(regs) / sizeof(regs[0]); for (int i = 0; i \u0026lt; length; i++) { printf(\u0026#34;%s 0x%x %d\\n\u0026#34;, regs[i], cpu.gpr[i], cpu.gpr[i]); } } 变量cpu的类型为CPU_state，在 /nemu/include/memory/isa.h可找到\n",
+  "keywords": [
+    
+  ],
+  "articleBody": "本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。\n单步执行 根据文档中提到的字符串处理函数即可，此处使用strtok(), sscanf() 进行处理\nstatic int cmd_si(char *args) { /*extract the first argument*/ char *arg = strtok(NULL, \" \"); /*the default is 1*/ if (arg == NULL) { cpu_exec(1); } else { int steps; /*convert to int*/ sscanf(arg, \"%d\", \u0026steps); cpu_exec(steps); } return 0; } strtok()的第一个参数为所处理的字符串str，第二个参数为处理的界限delimiting byte\n在sdb_mainloop()函数中，进行了第一次调用，指明了处理的字符串str\nchar *cmd = strtok(str, \" \"); 在后续的调用中，因为所处理的都是同一个字符串，第一个参数str则必须为NULL\nsscanf()则将char *类型的参数转换为int，便于函数cpu_exec()执行\n打印寄存器 仿照gdb格式同时打印十六进制和十进制的地址值，按照手册提示调用isa_reg_display()即可\nstatic int cmd_info(char *args) { char *arg = strtok(NULL, \" \"); if (arg == NULL) { printf(\"No args.\\n\"); } else if (strcmp(arg, \"r\") == 0) { isa_reg_display(); } return 0; } 其中isa_reg_display()实现为\nvoid isa_reg_display() { int length = sizeof(regs) / sizeof(regs[0]); for (int i = 0; i \u003c length; i++) { printf(\"%s 0x%x %d\\n\", regs[i], cpu.gpr[i], cpu.gpr[i]); } } 变量cpu的类型为CPU_state，在 /nemu/include/memory/isa.h可找到\n扫描内存 在手册中RTFSC篇章已经提到，访问内存的实现在nemu/src/memory中\n同上，调用一下已有的实现即可\nstatic int cmd_x(char *args) { /*extract the first and second argument*/ char *arg = strtok(NULL, \" \"); char *EXPR = strtok(NULL, \" \"); int i; if (arg == NULL || EXPR == NULL) { printf(\"No args.\\n\"); } else { int n; paddr_t expr; /*convert instructions*/ sscanf(arg, \"%d\", \u0026n); sscanf(EXPR, \"%x\", \u0026expr); for (i = 0; i \u003c n; i++) { printf(\"%#x: %#x\\n\", expr, paddr_read(expr, 4)); expr += 4; } } return 0; } 题目要求以十六进制形式输出连续的N个4字节，所以paddr_read()参数填4即可\n最后别忘记由于sdb是通过结构体数组cmd_table调用相应指令handler实现的，所以记得补全cmd_table并给出相应指令的help描述\nPA 1-1结束\n",
+  "wordCount" : "201",
+  "inLanguage": "en",
+  "datePublished": "2024-11-01T22:33:12+08:00",
+  "dateModified": "2024-11-01T22:33:12+08:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://Yang2KF.github.io/posts/ics_pa_1-1/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Yang2KF's blog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://Yang2KF.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://Yang2KF.github.io/" accesskey="h" title="Yang2KF&#39;s blog (Alt + H)">Yang2KF&#39;s blog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://Yang2KF.github.io/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://Yang2KF.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://Yang2KF.github.io/categories/" title="Categories">
+                    <span>Categories</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://Yang2KF.github.io/archives/" title="Archives">
+                    <span>Archives</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://Yang2KF.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://Yang2KF.github.io/">Home</a>&nbsp;»&nbsp;<a href="https://Yang2KF.github.io/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      ICS PA 1-1 基础设施
+    </h1>
+    <div class="post-meta"><span title='2024-11-01 22:33:12 +0800 CST'>November 1, 2024</span>&nbsp;·&nbsp;1 min
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#%e5%8d%95%e6%ad%a5%e6%89%a7%e8%a1%8c" aria-label="单步执行">单步执行</a></li>
+                <li>
+                    <a href="#%e6%89%93%e5%8d%b0%e5%af%84%e5%ad%98%e5%99%a8" aria-label="打印寄存器">打印寄存器</a></li>
+                <li>
+                    <a href="#%e6%89%ab%e6%8f%8f%e5%86%85%e5%ad%98" aria-label="扫描内存">扫描内存</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。</p>
+<h3 id="单步执行">单步执行<a hidden class="anchor" aria-hidden="true" href="#单步执行">#</a></h3>
+<p>根据文档中提到的字符串处理函数即可，此处使用<code>strtok()</code>, <code>sscanf()</code> 进行处理</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">static</span> <span style="color:#81a1c1">int</span> <span style="color:#88c0d0">cmd_si</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">char</span> <span style="color:#81a1c1">*</span>args<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#616e87;font-style:italic">/*extract the first argument*/</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">char</span> <span style="color:#81a1c1">*</span>arg <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">strtok</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">NULL</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#34; &#34;</span><span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#616e87;font-style:italic">/*the default is 1*/</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>arg <span style="color:#81a1c1">==</span> <span style="color:#81a1c1">NULL</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#88c0d0">cpu_exec</span><span style="color:#eceff4">(</span><span style="color:#b48ead">1</span><span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span> <span style="color:#81a1c1;font-weight:bold">else</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1">int</span> steps<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#616e87;font-style:italic">/*convert to int*/</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#88c0d0">sscanf</span><span style="color:#eceff4">(</span>arg<span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#34;%d&#34;</span><span style="color:#eceff4">,</span> <span style="color:#81a1c1">&amp;</span>steps<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#88c0d0">cpu_exec</span><span style="color:#eceff4">(</span>steps<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
+</span></span></code></pre></div><p><code>strtok()</code>的第一个参数为所处理的字符串<code>str</code>，第二个参数为处理的界限<code>delimiting byte</code></p>
+<p>在<code>sdb_mainloop()</code>函数中，进行了第一次调用，指明了处理的字符串<code>str</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1">char</span> <span style="color:#81a1c1">*</span>cmd <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">strtok</span><span style="color:#eceff4">(</span>str<span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#34; &#34;</span><span style="color:#eceff4">);</span>
+</span></span></code></pre></div><p>在后续的调用中，因为所处理的都是同一个字符串，第一个参数<code>str</code>则必须为<strong>NULL</strong></p>
+<p><code>sscanf()</code>则将<code>char *</code>类型的参数转换为<code>int</code>，便于函数<code>cpu_exec()</code>执行</p>
+<h3 id="打印寄存器">打印寄存器<a hidden class="anchor" aria-hidden="true" href="#打印寄存器">#</a></h3>
+<p>仿照gdb格式同时打印十六进制和十进制的地址值，按照手册提示调用<code>isa_reg_display()</code>即可</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">static</span> <span style="color:#81a1c1">int</span> <span style="color:#88c0d0">cmd_info</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">char</span> <span style="color:#81a1c1">*</span>args<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">char</span> <span style="color:#81a1c1">*</span>arg <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">strtok</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">NULL</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#34; &#34;</span><span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>arg <span style="color:#81a1c1">==</span> <span style="color:#81a1c1">NULL</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#88c0d0">printf</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;No args.</span><span style="color:#ebcb8b">\n</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span> <span style="color:#81a1c1;font-weight:bold">else</span> <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span><span style="color:#88c0d0">strcmp</span><span style="color:#eceff4">(</span>arg<span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#34;r&#34;</span><span style="color:#eceff4">)</span> <span style="color:#81a1c1">==</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#88c0d0">isa_reg_display</span><span style="color:#eceff4">();</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span> 
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
+</span></span></code></pre></div><p>其中<code>isa_reg_display()</code>实现为</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1">void</span> <span style="color:#88c0d0">isa_reg_display</span><span style="color:#eceff4">()</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">int</span> length <span style="color:#81a1c1">=</span> <span style="color:#81a1c1;font-weight:bold">sizeof</span><span style="color:#eceff4">(</span>regs<span style="color:#eceff4">)</span> <span style="color:#81a1c1">/</span> <span style="color:#81a1c1;font-weight:bold">sizeof</span><span style="color:#eceff4">(</span>regs<span style="color:#eceff4">[</span><span style="color:#b48ead">0</span><span style="color:#eceff4">]);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">for</span> <span style="color:#eceff4">(</span><span style="color:#81a1c1">int</span> i <span style="color:#81a1c1">=</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span> i <span style="color:#81a1c1">&lt;</span> length<span style="color:#eceff4">;</span> i<span style="color:#81a1c1">++</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#88c0d0">printf</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;%s     0x%x     %d</span><span style="color:#ebcb8b">\n</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">,</span> regs<span style="color:#eceff4">[</span>i<span style="color:#eceff4">],</span> cpu<span style="color:#eceff4">.</span>gpr<span style="color:#eceff4">[</span>i<span style="color:#eceff4">],</span> cpu<span style="color:#eceff4">.</span>gpr<span style="color:#eceff4">[</span>i<span style="color:#eceff4">]);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
+</span></span></code></pre></div><p>变量<code>cpu</code>的类型为<code>CPU_state</code>，在 <code>/nemu/include/memory/isa.h</code>可找到</p>
+<h3 id="扫描内存">扫描内存<a hidden class="anchor" aria-hidden="true" href="#扫描内存">#</a></h3>
+<p>在手册中<strong>RTFSC</strong>篇章已经提到，访问内存的实现在<code>nemu/src/memory</code>中</p>
+<p>同上，调用一下已有的实现即可</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">static</span> <span style="color:#81a1c1">int</span> <span style="color:#88c0d0">cmd_x</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">char</span> <span style="color:#81a1c1">*</span>args<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#616e87;font-style:italic">/*extract the first and second argument*/</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">char</span> <span style="color:#81a1c1">*</span>arg <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">strtok</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">NULL</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#34; &#34;</span><span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">char</span> <span style="color:#81a1c1">*</span>EXPR <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">strtok</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">NULL</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#34; &#34;</span><span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">int</span> i<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>arg <span style="color:#81a1c1">==</span> <span style="color:#81a1c1">NULL</span> <span style="color:#81a1c1">||</span> EXPR <span style="color:#81a1c1">==</span> <span style="color:#81a1c1">NULL</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#88c0d0">printf</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;No args.</span><span style="color:#ebcb8b">\n</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span> <span style="color:#81a1c1;font-weight:bold">else</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1">int</span> n<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1">paddr_t</span> expr<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#616e87;font-style:italic">/*convert instructions*/</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#88c0d0">sscanf</span><span style="color:#eceff4">(</span>arg<span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#34;%d&#34;</span><span style="color:#eceff4">,</span> <span style="color:#81a1c1">&amp;</span>n<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#88c0d0">sscanf</span><span style="color:#eceff4">(</span>EXPR<span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#34;%x&#34;</span><span style="color:#eceff4">,</span> <span style="color:#81a1c1">&amp;</span>expr<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">for</span> <span style="color:#eceff4">(</span>i <span style="color:#81a1c1">=</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span> i <span style="color:#81a1c1">&lt;</span> n<span style="color:#eceff4">;</span> i<span style="color:#81a1c1">++</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#88c0d0">printf</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;%#x:    %#x</span><span style="color:#ebcb8b">\n</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">,</span> expr<span style="color:#eceff4">,</span> <span style="color:#88c0d0">paddr_read</span><span style="color:#eceff4">(</span>expr<span style="color:#eceff4">,</span> <span style="color:#b48ead">4</span><span style="color:#eceff4">));</span>  
+</span></span><span style="display:flex;"><span>            expr <span style="color:#81a1c1">+=</span> <span style="color:#b48ead">4</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
+</span></span></code></pre></div><p>题目要求以十六进制形式输出连续的<code>N</code>个4字节，所以<code>paddr_read()</code>参数填4即可</p>
+<p>最后别忘记由于sdb是通过结构体数组<code>cmd_table</code>调用相应指令<code>handler</code>实现的，所以记得补全<code>cmd_table</code>并给出相应指令的<code>help</code>描述</p>
+<p>PA 1-1结束</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="next" href="https://Yang2KF.github.io/posts/hugo-githubpages/">
+    <span class="title">Next »</span>
+    <br>
+    <span>Hugo &#43; Github pages 搭建博客</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://Yang2KF.github.io/">Yang2KF&#39;s blog</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+<script>
+    (function(u, c) {
+      var d = document, t = 'script', o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function(e) { c(e); }); }
+      s.parentNode.insertBefore(o, s);
+    })('//cdn.bootcss.com/pangu/4.0.7/pangu.min.js', function() {
+      pangu.spacingPage();
+    });
+</script>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

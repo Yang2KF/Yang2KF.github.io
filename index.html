@@ -11,7 +11,7 @@
 <meta name="description" content="">
 <meta name="author" content="">
 <link rel="canonical" href="https://Yang2KF.github.io/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.632ca124969efafc0cc10b70a926bd13ae45642bec715786ebc7e3ecddbb6f80.css" integrity="sha256-YyyhJJae&#43;vwMwQtwqSa9E65FZCvscVeG68fj7N27b4A=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.778d247b40839112d8aa3a44faf102781aba3c65b190397f9249ba63c14a687f.css" integrity="sha256-d40ke0CDkRLYqjpE&#43;vECeBq6PGWxkDl/kkm6Y8FKaH8=" rel="preload stylesheet" as="style">
 <link rel="icon" href="https://Yang2KF.github.io/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="https://Yang2KF.github.io/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="https://Yang2KF.github.io/favicon-32x32.png">
@@ -163,6 +163,27 @@
 </div>
 
     </footer>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">ICS PA 1-1 基础设施
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。
+单步执行 根据文档中提到的字符串处理函数即可，此处使用strtok(), sscanf() 进行处理
+static int cmd_si(char *args) { /*extract the first argument*/ char *arg = strtok(NULL, &#34; &#34;); /*the default is 1*/ if (arg == NULL) { cpu_exec(1); } else { int steps; /*convert to int*/ sscanf(arg, &#34;%d&#34;, &amp;steps); cpu_exec(steps); } return 0; } strtok()的第一个参数为所处理的字符串str，第二个参数为处理的界限delimiting byte
+在sdb_mainloop()函数中，进行了第一次调用，指明了处理的字符串str
+char *cmd = strtok(str, &#34; &#34;); 在后续的调用中，因为所处理的都是同一个字符串，第一个参数str则必须为NULL
+sscanf()则将char *类型的参数转换为int，便于函数cpu_exec()执行
+打印寄存器 仿照gdb格式同时打印十六进制和十进制的地址值，按照手册提示调用isa_reg_display()即可
+static int cmd_info(char *args) { char *arg = strtok(NULL, &#34; &#34;); if (arg == NULL) { printf(&#34;No args.\n&#34;); } else if (strcmp(arg, &#34;r&#34;) == 0) { isa_reg_display(); } return 0; } 其中isa_reg_display()实现为
+void isa_reg_display() { int length = sizeof(regs) / sizeof(regs[0]); for (int i = 0; i &lt; length; i&#43;&#43;) { printf(&#34;%s 0x%x %d\n&#34;, regs[i], cpu.gpr[i], cpu.gpr[i]); } } 变量cpu的类型为CPU_state，在 /nemu/include/memory/isa.h可找到
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-11-01 22:33:12 +0800 CST'>November 1, 2024</span>&nbsp;·&nbsp;1 min</footer>
+  <a class="entry-link" aria-label="post link to ICS PA 1-1 基础设施" href="https://Yang2KF.github.io/posts/ics_pa_1-1/"></a>
 </article>
 
 <article class="post-entry"> 
