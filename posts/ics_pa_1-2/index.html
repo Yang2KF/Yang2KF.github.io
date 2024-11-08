@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>ICS PA 1-2 表达式求值 | Yang2KF&#39;s blog</title>
+<meta name="keywords" content="">
+<meta name="description" content="本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。
+词法分析
+首先，针对简单算术运算符增加几条正则规则
+static struct rule {
+	const char *regex;
+    int token_type;
+} rules[] = {
+
+  	/* TODO: Add more rules.
+   	* Pay attention to the precedence level of different rules.
+   	*/
+
+	{&#34; &#43;&#34;, TK_NOTYPE},    // spaces
+ 	{&#34;\\&#43;&#34;, &#39;&#43;&#39;}, 
+ 	{&#34;==&#34;, TK_EQ},        // equal
+ 	{&#34;-&#34;, &#39;-&#39;},   
+ 	{&#34;\\*&#34;, &#39;*&#39;},  
+ 	{&#34;/&#34;, &#39;/&#39;},    
+ 	{&#34;\\(&#34;, &#39;(&#39;},  
+ 	{&#34;\\)&#34;, &#39;)&#39;},  
+ 	{&#34;[0-9]&#43;&#34;, TK_NUM} // numbers
+};
+注意，由于&#43;，*，(，)在正则表达式中属于元字符，有特殊含义，所以需要另一个元字符\将其转义，但是由于在C语言中\属于转义字符，为了在字符串中包含字面量\，我们需要将其转义，即为\\
+接下来完成token的识别，为保持简洁，已省略大部分起始代码
+static bool make_token(char* e) {
+    //...
+    while (e[position] != &#39;\0&#39;) {
+        for (i = 0; i &lt; NR_REGEX; i&#43;&#43;) {
+            if (regexec(&amp;re[i], e &#43; position, 1, &amp;pmatch, 0) == 0 &amp;&amp; pmatch.rm_so == 0) {
+                //...
+
+                if (rules[i].token_type == TK_NOTYPE)
+                    break;
+
+                tokens[nr_token].type = rules[i].token_type;
+
+                switch (rules[i].token_type) {
+                case TK_NUM:
+                    strncpy(tokens[nr_token].str, substr_start, substr_len);
+                    tokens[nr_token].str[substr_len] = &#39;\0&#39;;
+                    break;
+                }
+
+                nr_token&#43;&#43;;
+                break;
+            }
+        }
+		//...
+    }
+    return true;
+}
+通过阅读手册得知，regcomp()函数将提供的正则表达式转换为能够被regexec()识别的格式，而regexec()则开始对提供的字符串e进行匹配">
+<meta name="author" content="">
+<link rel="canonical" href="http://localhost:1313/posts/ics_pa_1-2/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.778d247b40839112d8aa3a44faf102781aba3c65b190397f9249ba63c14a687f.css" integrity="sha256-d40ke0CDkRLYqjpE&#43;vECeBq6PGWxkDl/kkm6Y8FKaH8=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
+<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/ics_pa_1-2/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="ICS PA 1-2 表达式求值" />
+<meta property="og:description" content="本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。
+词法分析
+首先，针对简单算术运算符增加几条正则规则
+static struct rule {
+	const char *regex;
+    int token_type;
+} rules[] = {
+
+  	/* TODO: Add more rules.
+   	* Pay attention to the precedence level of different rules.
+   	*/
+
+	{&#34; &#43;&#34;, TK_NOTYPE},    // spaces
+ 	{&#34;\\&#43;&#34;, &#39;&#43;&#39;}, 
+ 	{&#34;==&#34;, TK_EQ},        // equal
+ 	{&#34;-&#34;, &#39;-&#39;},   
+ 	{&#34;\\*&#34;, &#39;*&#39;},  
+ 	{&#34;/&#34;, &#39;/&#39;},    
+ 	{&#34;\\(&#34;, &#39;(&#39;},  
+ 	{&#34;\\)&#34;, &#39;)&#39;},  
+ 	{&#34;[0-9]&#43;&#34;, TK_NUM} // numbers
+};
+注意，由于&#43;，*，(，)在正则表达式中属于元字符，有特殊含义，所以需要另一个元字符\将其转义，但是由于在C语言中\属于转义字符，为了在字符串中包含字面量\，我们需要将其转义，即为\\
+接下来完成token的识别，为保持简洁，已省略大部分起始代码
+static bool make_token(char* e) {
+    //...
+    while (e[position] != &#39;\0&#39;) {
+        for (i = 0; i &lt; NR_REGEX; i&#43;&#43;) {
+            if (regexec(&amp;re[i], e &#43; position, 1, &amp;pmatch, 0) == 0 &amp;&amp; pmatch.rm_so == 0) {
+                //...
+
+                if (rules[i].token_type == TK_NOTYPE)
+                    break;
+
+                tokens[nr_token].type = rules[i].token_type;
+
+                switch (rules[i].token_type) {
+                case TK_NUM:
+                    strncpy(tokens[nr_token].str, substr_start, substr_len);
+                    tokens[nr_token].str[substr_len] = &#39;\0&#39;;
+                    break;
+                }
+
+                nr_token&#43;&#43;;
+                break;
+            }
+        }
+		//...
+    }
+    return true;
+}
+通过阅读手册得知，regcomp()函数将提供的正则表达式转换为能够被regexec()识别的格式，而regexec()则开始对提供的字符串e进行匹配" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://localhost:1313/posts/ics_pa_1-2/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-11-04T21:12:07+08:00" />
+<meta property="article:modified_time" content="2024-11-04T21:12:07+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="ICS PA 1-2 表达式求值"/>
+<meta name="twitter:description" content="本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。
+词法分析
+首先，针对简单算术运算符增加几条正则规则
+static struct rule {
+	const char *regex;
+    int token_type;
+} rules[] = {
+
+  	/* TODO: Add more rules.
+   	* Pay attention to the precedence level of different rules.
+   	*/
+
+	{&#34; &#43;&#34;, TK_NOTYPE},    // spaces
+ 	{&#34;\\&#43;&#34;, &#39;&#43;&#39;}, 
+ 	{&#34;==&#34;, TK_EQ},        // equal
+ 	{&#34;-&#34;, &#39;-&#39;},   
+ 	{&#34;\\*&#34;, &#39;*&#39;},  
+ 	{&#34;/&#34;, &#39;/&#39;},    
+ 	{&#34;\\(&#34;, &#39;(&#39;},  
+ 	{&#34;\\)&#34;, &#39;)&#39;},  
+ 	{&#34;[0-9]&#43;&#34;, TK_NUM} // numbers
+};
+注意，由于&#43;，*，(，)在正则表达式中属于元字符，有特殊含义，所以需要另一个元字符\将其转义，但是由于在C语言中\属于转义字符，为了在字符串中包含字面量\，我们需要将其转义，即为\\
+接下来完成token的识别，为保持简洁，已省略大部分起始代码
+static bool make_token(char* e) {
+    //...
+    while (e[position] != &#39;\0&#39;) {
+        for (i = 0; i &lt; NR_REGEX; i&#43;&#43;) {
+            if (regexec(&amp;re[i], e &#43; position, 1, &amp;pmatch, 0) == 0 &amp;&amp; pmatch.rm_so == 0) {
+                //...
+
+                if (rules[i].token_type == TK_NOTYPE)
+                    break;
+
+                tokens[nr_token].type = rules[i].token_type;
+
+                switch (rules[i].token_type) {
+                case TK_NUM:
+                    strncpy(tokens[nr_token].str, substr_start, substr_len);
+                    tokens[nr_token].str[substr_len] = &#39;\0&#39;;
+                    break;
+                }
+
+                nr_token&#43;&#43;;
+                break;
+            }
+        }
+		//...
+    }
+    return true;
+}
+通过阅读手册得知，regcomp()函数将提供的正则表达式转换为能够被regexec()识别的格式，而regexec()则开始对提供的字符串e进行匹配"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "ICS PA 1-2 表达式求值",
+      "item": "http://localhost:1313/posts/ics_pa_1-2/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ICS PA 1-2 表达式求值",
+  "name": "ICS PA 1-2 表达式求值",
+  "description": "本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。\n词法分析 首先，针对简单算术运算符增加几条正则规则\nstatic struct rule { const char *regex; int token_type; } rules[] = { /* TODO: Add more rules. * Pay attention to the precedence level of different rules. */ {\u0026#34; +\u0026#34;, TK_NOTYPE}, // spaces {\u0026#34;\\\\+\u0026#34;, \u0026#39;+\u0026#39;}, {\u0026#34;==\u0026#34;, TK_EQ}, // equal {\u0026#34;-\u0026#34;, \u0026#39;-\u0026#39;}, {\u0026#34;\\\\*\u0026#34;, \u0026#39;*\u0026#39;}, {\u0026#34;/\u0026#34;, \u0026#39;/\u0026#39;}, {\u0026#34;\\\\(\u0026#34;, \u0026#39;(\u0026#39;}, {\u0026#34;\\\\)\u0026#34;, \u0026#39;)\u0026#39;}, {\u0026#34;[0-9]+\u0026#34;, TK_NUM} // numbers }; 注意，由于+，*，(，)在正则表达式中属于元字符，有特殊含义，所以需要另一个元字符\\将其转义，但是由于在C语言中\\属于转义字符，为了在字符串中包含字面量\\，我们需要将其转义，即为\\\\\n接下来完成token的识别，为保持简洁，已省略大部分起始代码\nstatic bool make_token(char* e) { //... while (e[position] != \u0026#39;\\0\u0026#39;) { for (i = 0; i \u0026lt; NR_REGEX; i++) { if (regexec(\u0026amp;re[i], e + position, 1, \u0026amp;pmatch, 0) == 0 \u0026amp;\u0026amp; pmatch.rm_so == 0) { //... if (rules[i].token_type == TK_NOTYPE) break; tokens[nr_token].type = rules[i].token_type; switch (rules[i].token_type) { case TK_NUM: strncpy(tokens[nr_token].str, substr_start, substr_len); tokens[nr_token].str[substr_len] = \u0026#39;\\0\u0026#39;; break; } nr_token++; break; } } //... } return true; } 通过阅读手册得知，regcomp()函数将提供的正则表达式转换为能够被regexec()识别的格式，而regexec()则开始对提供的字符串e进行匹配\n",
+  "keywords": [
+    
+  ],
+  "articleBody": "本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。\n词法分析 首先，针对简单算术运算符增加几条正则规则\nstatic struct rule { const char *regex; int token_type; } rules[] = { /* TODO: Add more rules. * Pay attention to the precedence level of different rules. */ {\" +\", TK_NOTYPE}, // spaces {\"\\\\+\", '+'}, {\"==\", TK_EQ}, // equal {\"-\", '-'}, {\"\\\\*\", '*'}, {\"/\", '/'}, {\"\\\\(\", '('}, {\"\\\\)\", ')'}, {\"[0-9]+\", TK_NUM} // numbers }; 注意，由于+，*，(，)在正则表达式中属于元字符，有特殊含义，所以需要另一个元字符\\将其转义，但是由于在C语言中\\属于转义字符，为了在字符串中包含字面量\\，我们需要将其转义，即为\\\\\n接下来完成token的识别，为保持简洁，已省略大部分起始代码\nstatic bool make_token(char* e) { //... while (e[position] != '\\0') { for (i = 0; i \u003c NR_REGEX; i++) { if (regexec(\u0026re[i], e + position, 1, \u0026pmatch, 0) == 0 \u0026\u0026 pmatch.rm_so == 0) { //... if (rules[i].token_type == TK_NOTYPE) break; tokens[nr_token].type = rules[i].token_type; switch (rules[i].token_type) { case TK_NUM: strncpy(tokens[nr_token].str, substr_start, substr_len); tokens[nr_token].str[substr_len] = '\\0'; break; } nr_token++; break; } } //... } return true; } 通过阅读手册得知，regcomp()函数将提供的正则表达式转换为能够被regexec()识别的格式，而regexec()则开始对提供的字符串e进行匹配\n主要的逻辑是：只要不为空格类型TK_NOTYPE就认为识别成功，如果是数字类型TK_NUM就将数字记录到相应token的缓存区str即可\n递归求值 手册上提到’在求值过程中发现表达式不合法的时候, 应该给上层函数返回一个表示出错的标识’，此处使用valid标识表达式是否合法\nword_t eval(int p, int q, bool* valid) { *valid = true; if (p \u003e q) { /* Bad expression */ *valid = false; return 0; } else if (p == q) { /* Single token. * For now this token should be a number. * Return the value of the number. */ if (tokens[p].type != TK_NUM) { *valid = false; return 0; } word_t ret = strtol(tokens[p].str, NULL, 10); return ret; } else if (check_parentheses(p, q, valid) == true) { /* The expression is surrounded by a matched pair of parentheses. * If that is the case, just throw away the parentheses. */ return eval(p + 1, q - 1, valid); } else if (*valid == true) { int op = find_major(p, q); if (op \u003c 0) { *valid = false; return 0; } word_t val0 = eval(p, op - 1, valid); word_t val1 = eval(op + 1, q, valid); switch (tokens[op].type) { case '+': return val0 + val1; case '-': return val0 - val1; case '*': return val0 * val1; case '/': return val0 / val1; default: assert(-1); } } return 0; } 函数的逻辑较为简单，要注意的是我们在p==q是使用了strtol()函数将缓存在str中的数字转换为长整型，其中的参数10即代表十进制\ncheck_paratheses()的实现\nbool check_parentheses(int p, int q, bool* valid) { int paren = 0;//count paranthese if (tokens[p].type == '(' \u0026\u0026 tokens[q].type == ')') { bool flag = true; for (int i = p + 1; i \u003c q; i++) { if(tokens[i].type == ')' \u0026\u0026 (paren == 0) \u0026\u0026 flag) { flag = false; paren--; } if (tokens[i].type == '(') { paren++; } else if (tokens[i].type == ')') { if (paren == 0) { *valid = false; return false; //bad expression } paren--; } } return (paren == 0) \u0026\u0026 flag; } else { /*There are two situations, the one is bad expression, */ for (int i = p; i \u003c= q; i++) { if (tokens[i].type != '(' \u0026\u0026 tokens[i].type != ')') { continue; } else if (tokens[i].type == '(') { paren++; } else if (tokens[i].type == ')') { if (paren == 0) { *valid = false; return false; } paren--; } } /*The another one is legal expression, */ /*handed over to another function find_major() processing*/ *valid = true; return false; } } 简单讲讲上面的逻辑\n第一种情况为传入的表达式首尾已经被括号包围，这里用flag来进行判断\n①形如 (20) + (30) 表达式合法，但返回false\n②形如 (20 + 30) 表达式合法， 返回true\n③表达式非法\n第二种情况为传入的整个表达式并没有被括号包围，此时又有两种情况：\n①表达式非法，那么直接*valid = false即可\n②表达式合法，可继续求值，设置*valid = true; return false即可\n最后是找主运算符find_major()的实现\nint find_major(int p, int q) { int ret = -1; int paren = 0; //count parenthese int priority = 0; for (int i = p; i \u003c= q; i++) { if (tokens[i].type == TK_NUM) { continue; } else if (tokens[i].type == '(') { paren++; } else if (tokens[i].type == ')') { if (paren == 0) { return -1; } paren--; } else if (paren \u003e 0) { continue; } else { int temp_prio; switch (tokens[i].type) { case '*': case '/': temp_prio = 1; break; case '+': case '-': temp_prio = 2; break; default: assert(0); } if (temp_prio \u003e= priority) { priority = temp_prio; ret = i; } } } return ret; } 逻辑很简单，首先都是对表达式是否合法进行判断，唯一与check_paratheses()不同的一点是多了一个条件\nelse if (paren \u003e 0) { continue; } 即在括号内的运算符不是主运算符\n最后判断一下优先级大小，返回优先级最小的符号位置即可\n测试代码 /*Test my funtion expr()*/ FILE* file = fopen(\"/home/sino/PA/ics2024/nemu/tools/gen-expr/build/input\", \"r\"); if (!file) { assert(0); } char line[256]; while (fgets(line, sizeof(line), file)) { unsigned int expected_result; char expression[256]; bool valid; sscanf(line, \"%u %[^\\n]\", \u0026expected_result, expression); // Call expr function word_t result = expr(expression, \u0026valid); printf(\"the expr result is: %d\\n\", result); // Compare results if (valid == true) { if (result == expected_result) { printf(\"Success: %u = %s\\n\", result, expression); } else { printf(\"Mismatch: %u (calculated) != %u (expected) for expression: %s\\n\", result, expected_result, expression); } } else { printf(\"Invalid expression: %s\\n\", expression); } } 按照手册上的来做就行，没什么特别的\n选做题 负号的实现 给定一个新的token类型TK_NEG来标识负号，具体处理思路是在处理完token之后，且在进入表达式求值之前，将满足条件的token类型改为TK_NEG\nfor (int i = 0; i \u003c nr_token; i++) { if (i == 0 || (tokens[i - 1].type != ')' \u0026\u0026 tokens[i - 1].type != TK_NUM)) { if (tokens[i].type == '-') { tokens[i].type = TK_NEG; } } } 负号可以看作是一元运算符，与之前所编写的二元运算符不同，一元运算符只有一个操作数\n仿照二元运算操作，在找到主运算符之后，就需要将左右两个表达式与主运算符进行运算，那么一元运算符逻辑也应当如此\n所以应当在find_major()函数中做出区分，设定若找不到二元运算符则返回-1表明此为一元运算符\ndefault: temp_prio = -1; // no binary operator 之后给出单独的处理逻辑即可\nif (op \u003c 0) { // If no major operator, we need to check for unary operators if (tokens[p].type == TK_NEG) { // Handle unary negation word_t val = eval(p + 1, q, valid); return -val; } *valid = false; return 0; } PA 1-2结束\n",
+  "wordCount" : "827",
+  "inLanguage": "en",
+  "datePublished": "2024-11-04T21:12:07+08:00",
+  "dateModified": "2024-11-04T21:12:07+08:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/ics_pa_1-2/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Yang2KF's blog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="Yang2KF&#39;s blog (Alt + H)">Yang2KF&#39;s blog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/categories/" title="Categories">
+                    <span>Categories</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/archives/" title="Archives">
+                    <span>Archives</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      ICS PA 1-2 表达式求值
+      <span class="entry-hint" title="Draft">
+        <svg xmlns="http://www.w3.org/2000/svg" height="35" viewBox="0 -960 960 960" fill="currentColor">
+          <path
+            d="M160-410v-60h300v60H160Zm0-165v-60h470v60H160Zm0-165v-60h470v60H160Zm360 580v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0 11-4.5 22.5T862.09-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z" />
+        </svg>
+      </span>
+    </h1>
+    <div class="post-meta"><span title='2024-11-04 21:12:07 +0800 CST'>November 4, 2024</span>&nbsp;·&nbsp;4 min
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#%e8%af%8d%e6%b3%95%e5%88%86%e6%9e%90" aria-label="词法分析">词法分析</a><ul>
+                        
+                <li>
+                    <a href="#%e9%80%92%e5%bd%92%e6%b1%82%e5%80%bc" aria-label="递归求值">递归求值</a></li></ul>
+                </li>
+                <li>
+                    <a href="#%e6%b5%8b%e8%af%95%e4%bb%a3%e7%a0%81" aria-label="测试代码">测试代码</a></li>
+                <li>
+                    <a href="#%e9%80%89%e5%81%9a%e9%a2%98" aria-label="选做题">选做题</a><ul>
+                        
+                <li>
+                    <a href="#%e8%b4%9f%e5%8f%b7%e7%9a%84%e5%ae%9e%e7%8e%b0" aria-label="负号的实现">负号的实现</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。</p>
+<h2 id="词法分析">词法分析<a hidden class="anchor" aria-hidden="true" href="#词法分析">#</a></h2>
+<p>首先，针对简单算术运算符增加几条正则规则</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">static</span> <span style="color:#81a1c1;font-weight:bold">struct</span> rule <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#81a1c1;font-weight:bold">const</span> <span style="color:#81a1c1">char</span> <span style="color:#81a1c1">*</span>regex<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">int</span> token_type<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span> rules<span style="color:#eceff4">[]</span> <span style="color:#81a1c1">=</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  	<span style="color:#616e87;font-style:italic">/* TODO: Add more rules.
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic">   	* Pay attention to the precedence level of different rules.
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic">   	*/</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>	<span style="color:#eceff4">{</span><span style="color:#a3be8c">&#34; +&#34;</span><span style="color:#eceff4">,</span> TK_NOTYPE<span style="color:#eceff4">},</span>    <span style="color:#616e87;font-style:italic">// spaces
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic"></span> 	<span style="color:#eceff4">{</span><span style="color:#a3be8c">&#34;</span><span style="color:#ebcb8b">\\</span><span style="color:#a3be8c">+&#34;</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;+&#39;</span><span style="color:#eceff4">},</span> 
+</span></span><span style="display:flex;"><span> 	<span style="color:#eceff4">{</span><span style="color:#a3be8c">&#34;==&#34;</span><span style="color:#eceff4">,</span> TK_EQ<span style="color:#eceff4">},</span>        <span style="color:#616e87;font-style:italic">// equal
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic"></span> 	<span style="color:#eceff4">{</span><span style="color:#a3be8c">&#34;-&#34;</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;-&#39;</span><span style="color:#eceff4">},</span>   
+</span></span><span style="display:flex;"><span> 	<span style="color:#eceff4">{</span><span style="color:#a3be8c">&#34;</span><span style="color:#ebcb8b">\\</span><span style="color:#a3be8c">*&#34;</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;*&#39;</span><span style="color:#eceff4">},</span>  
+</span></span><span style="display:flex;"><span> 	<span style="color:#eceff4">{</span><span style="color:#a3be8c">&#34;/&#34;</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;/&#39;</span><span style="color:#eceff4">},</span>    
+</span></span><span style="display:flex;"><span> 	<span style="color:#eceff4">{</span><span style="color:#a3be8c">&#34;</span><span style="color:#ebcb8b">\\</span><span style="color:#a3be8c">(&#34;</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;(&#39;</span><span style="color:#eceff4">},</span>  
+</span></span><span style="display:flex;"><span> 	<span style="color:#eceff4">{</span><span style="color:#a3be8c">&#34;</span><span style="color:#ebcb8b">\\</span><span style="color:#a3be8c">)&#34;</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;)&#39;</span><span style="color:#eceff4">},</span>  
+</span></span><span style="display:flex;"><span> 	<span style="color:#eceff4">{</span><span style="color:#a3be8c">&#34;[0-9]+&#34;</span><span style="color:#eceff4">,</span> TK_NUM<span style="color:#eceff4">}</span> <span style="color:#616e87;font-style:italic">// numbers
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic"></span><span style="color:#eceff4">};</span>
+</span></span></code></pre></div><p>注意，由于<code>+</code>，<code>*</code>，<code>(</code>，<code>)</code>在正则表达式中属于元字符，有特殊含义，所以需要另一个元字符<code>\</code>将其转义，但是由于在C语言中<code>\</code>属于转义字符，为了在字符串中包含字面量<code>\</code>，我们需要将其转义，即为<code>\\</code></p>
+<p>接下来完成<code>token</code>的识别，为保持简洁，已省略大部分起始代码</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">static</span> <span style="color:#81a1c1">bool</span> <span style="color:#88c0d0">make_token</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">char</span><span style="color:#81a1c1">*</span> e<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#616e87;font-style:italic">//...
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic"></span>    <span style="color:#81a1c1;font-weight:bold">while</span> <span style="color:#eceff4">(</span>e<span style="color:#eceff4">[</span>position<span style="color:#eceff4">]</span> <span style="color:#81a1c1">!=</span> <span style="color:#a3be8c">&#39;\0&#39;</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">for</span> <span style="color:#eceff4">(</span>i <span style="color:#81a1c1">=</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span> i <span style="color:#81a1c1">&lt;</span> NR_REGEX<span style="color:#eceff4">;</span> i<span style="color:#81a1c1">++</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span><span style="color:#88c0d0">regexec</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">&amp;</span>re<span style="color:#eceff4">[</span>i<span style="color:#eceff4">],</span> e <span style="color:#81a1c1">+</span> position<span style="color:#eceff4">,</span> <span style="color:#b48ead">1</span><span style="color:#eceff4">,</span> <span style="color:#81a1c1">&amp;</span>pmatch<span style="color:#eceff4">,</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">)</span> <span style="color:#81a1c1">==</span> <span style="color:#b48ead">0</span> <span style="color:#81a1c1">&amp;&amp;</span> pmatch<span style="color:#eceff4">.</span>rm_so <span style="color:#81a1c1">==</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#616e87;font-style:italic">//...
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic"></span>
+</span></span><span style="display:flex;"><span>                <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>rules<span style="color:#eceff4">[</span>i<span style="color:#eceff4">].</span>token_type <span style="color:#81a1c1">==</span> TK_NOTYPE<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#81a1c1;font-weight:bold">break</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                tokens<span style="color:#eceff4">[</span>nr_token<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">=</span> rules<span style="color:#eceff4">[</span>i<span style="color:#eceff4">].</span>token_type<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#81a1c1;font-weight:bold">switch</span> <span style="color:#eceff4">(</span>rules<span style="color:#eceff4">[</span>i<span style="color:#eceff4">].</span>token_type<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#81a1c1;font-weight:bold">case</span> <span style="color:#8fbcbb">TK_NUM</span><span style="color:#eceff4">:</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#88c0d0">strncpy</span><span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>nr_token<span style="color:#eceff4">].</span>str<span style="color:#eceff4">,</span> substr_start<span style="color:#eceff4">,</span> substr_len<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>                    tokens<span style="color:#eceff4">[</span>nr_token<span style="color:#eceff4">].</span>str<span style="color:#eceff4">[</span>substr_len<span style="color:#eceff4">]</span> <span style="color:#81a1c1">=</span> <span style="color:#a3be8c">&#39;\0&#39;</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#81a1c1;font-weight:bold">break</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                nr_token<span style="color:#81a1c1">++</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#81a1c1;font-weight:bold">break</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>		<span style="color:#616e87;font-style:italic">//...
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic"></span>    <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#81a1c1">true</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
+</span></span></code></pre></div><p>通过阅读手册得知，<code>regcomp()</code>函数将提供的正则表达式转换为能够被<code>regexec()</code>识别的格式，而<code>regexec()</code>则开始对提供的字符串<code>e</code>进行匹配</p>
+<p>主要的逻辑是：只要不为空格类型<code>TK_NOTYPE</code>就认为识别成功，如果是数字类型<code>TK_NUM</code>就将数字记录到相应<code>token</code>的缓存区<code>str</code>即可</p>
+<h3 id="递归求值">递归求值<a hidden class="anchor" aria-hidden="true" href="#递归求值">#</a></h3>
+<p>手册上提到&rsquo;在求值过程中发现表达式不合法的时候, 应该给上层函数返回一个表示出错的标识&rsquo;，此处使用<code>valid</code>标识表达式是否合法</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1">word_t</span> <span style="color:#88c0d0">eval</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">int</span> p<span style="color:#eceff4">,</span> <span style="color:#81a1c1">int</span> q<span style="color:#eceff4">,</span> <span style="color:#81a1c1">bool</span><span style="color:#81a1c1">*</span> valid<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">*</span>valid <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">true</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>p <span style="color:#81a1c1">&gt;</span> q<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#616e87;font-style:italic">/* Bad expression */</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1">*</span>valid <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">false</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">else</span> <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>p <span style="color:#81a1c1">==</span> q<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#616e87;font-style:italic">/* Single token.
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic">        * For now this token should be a number.
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic">        * Return the value of the number.
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic">        */</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>p<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">!=</span> TK_NUM<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1">*</span>valid <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">false</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1">word_t</span> ret <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">strtol</span><span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>p<span style="color:#eceff4">].</span>str<span style="color:#eceff4">,</span> <span style="color:#81a1c1">NULL</span><span style="color:#eceff4">,</span> <span style="color:#b48ead">10</span><span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">return</span> ret<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">else</span> <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span><span style="color:#88c0d0">check_parentheses</span><span style="color:#eceff4">(</span>p<span style="color:#eceff4">,</span> q<span style="color:#eceff4">,</span> valid<span style="color:#eceff4">)</span> <span style="color:#81a1c1">==</span> <span style="color:#81a1c1">true</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#616e87;font-style:italic">/* The expression is surrounded by a matched pair of parentheses.
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic">        * If that is the case, just throw away the parentheses.
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic">        */</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#88c0d0">eval</span><span style="color:#eceff4">(</span>p <span style="color:#81a1c1">+</span> <span style="color:#b48ead">1</span><span style="color:#eceff4">,</span> q <span style="color:#81a1c1">-</span> <span style="color:#b48ead">1</span><span style="color:#eceff4">,</span> valid<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">else</span> <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span><span style="color:#81a1c1">*</span>valid <span style="color:#81a1c1">==</span> <span style="color:#81a1c1">true</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1">int</span> op <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">find_major</span><span style="color:#eceff4">(</span>p<span style="color:#eceff4">,</span> q<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>op <span style="color:#81a1c1">&lt;</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1">*</span>valid <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">false</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1">word_t</span> val0 <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">eval</span><span style="color:#eceff4">(</span>p<span style="color:#eceff4">,</span> op <span style="color:#81a1c1">-</span> <span style="color:#b48ead">1</span><span style="color:#eceff4">,</span> valid<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1">word_t</span> val1 <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">eval</span><span style="color:#eceff4">(</span>op <span style="color:#81a1c1">+</span> <span style="color:#b48ead">1</span><span style="color:#eceff4">,</span> q<span style="color:#eceff4">,</span> valid<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">switch</span> <span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>op<span style="color:#eceff4">].</span>type<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">case</span> <span style="color:#a3be8c">&#39;+&#39;</span><span style="color:#81a1c1">:</span> <span style="color:#81a1c1;font-weight:bold">return</span> val0 <span style="color:#81a1c1">+</span> val1<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">case</span> <span style="color:#a3be8c">&#39;-&#39;</span><span style="color:#81a1c1">:</span> <span style="color:#81a1c1;font-weight:bold">return</span> val0 <span style="color:#81a1c1">-</span> val1<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">case</span> <span style="color:#a3be8c">&#39;*&#39;</span><span style="color:#81a1c1">:</span> <span style="color:#81a1c1;font-weight:bold">return</span> val0 <span style="color:#81a1c1">*</span> val1<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">case</span> <span style="color:#a3be8c">&#39;/&#39;</span><span style="color:#81a1c1">:</span> <span style="color:#81a1c1;font-weight:bold">return</span> val0 <span style="color:#81a1c1">/</span> val1<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">default</span><span style="color:#81a1c1">:</span> <span style="color:#88c0d0">assert</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">-</span><span style="color:#b48ead">1</span><span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
+</span></span></code></pre></div><p>函数的逻辑较为简单，要注意的是我们在<code>p==q</code>是使用了<code>strtol()</code>函数将缓存在<code>str</code>中的数字转换为长整型，其中的参数<code>10</code>即代表十进制</p>
+<p><code>check_paratheses()</code>的实现</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1">bool</span> <span style="color:#88c0d0">check_parentheses</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">int</span> p<span style="color:#eceff4">,</span> <span style="color:#81a1c1">int</span> q<span style="color:#eceff4">,</span> <span style="color:#81a1c1">bool</span><span style="color:#81a1c1">*</span> valid<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">int</span> paren <span style="color:#81a1c1">=</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span><span style="color:#616e87;font-style:italic">//count paranthese
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic"></span>    <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>p<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">==</span> <span style="color:#a3be8c">&#39;(&#39;</span> <span style="color:#81a1c1">&amp;&amp;</span> tokens<span style="color:#eceff4">[</span>q<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">==</span> <span style="color:#a3be8c">&#39;)&#39;</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1">bool</span> flag <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">true</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">for</span> <span style="color:#eceff4">(</span><span style="color:#81a1c1">int</span> i <span style="color:#81a1c1">=</span> p <span style="color:#81a1c1">+</span> <span style="color:#b48ead">1</span><span style="color:#eceff4">;</span> i <span style="color:#81a1c1">&lt;</span> q<span style="color:#eceff4">;</span> i<span style="color:#81a1c1">++</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1;font-weight:bold">if</span><span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>i<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">==</span> <span style="color:#a3be8c">&#39;)&#39;</span> <span style="color:#81a1c1">&amp;&amp;</span> <span style="color:#eceff4">(</span>paren <span style="color:#81a1c1">==</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">)</span> <span style="color:#81a1c1">&amp;&amp;</span> flag<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>                flag <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">false</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>                paren<span style="color:#81a1c1">--</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>i<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">==</span> <span style="color:#a3be8c">&#39;(&#39;</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>                paren<span style="color:#81a1c1">++</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1;font-weight:bold">else</span> <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>i<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">==</span> <span style="color:#a3be8c">&#39;)&#39;</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>paren <span style="color:#81a1c1">==</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#81a1c1">*</span>valid <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">false</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#81a1c1">false</span><span style="color:#eceff4">;</span> <span style="color:#616e87;font-style:italic">//bad expression
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic"></span>                <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>                paren<span style="color:#81a1c1">--</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#eceff4">(</span>paren <span style="color:#81a1c1">==</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">)</span> <span style="color:#81a1c1">&amp;&amp;</span> flag<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">else</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#616e87;font-style:italic">/*There are two situations, the one is bad expression, */</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">for</span> <span style="color:#eceff4">(</span><span style="color:#81a1c1">int</span> i <span style="color:#81a1c1">=</span> p<span style="color:#eceff4">;</span> i <span style="color:#81a1c1">&lt;=</span> q<span style="color:#eceff4">;</span> i<span style="color:#81a1c1">++</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>i<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">!=</span> <span style="color:#a3be8c">&#39;(&#39;</span> <span style="color:#81a1c1">&amp;&amp;</span> tokens<span style="color:#eceff4">[</span>i<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">!=</span> <span style="color:#a3be8c">&#39;)&#39;</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#81a1c1;font-weight:bold">continue</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1;font-weight:bold">else</span> <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>i<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">==</span> <span style="color:#a3be8c">&#39;(&#39;</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>                paren<span style="color:#81a1c1">++</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1;font-weight:bold">else</span> <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>i<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">==</span> <span style="color:#a3be8c">&#39;)&#39;</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>paren <span style="color:#81a1c1">==</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#81a1c1">*</span>valid <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">false</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>                    <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#81a1c1">false</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>                paren<span style="color:#81a1c1">--</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#616e87;font-style:italic">/*The another one is legal expression, */</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#616e87;font-style:italic">/*handed over to another function find_major() processing*/</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1">*</span>valid <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">true</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#81a1c1">false</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
+</span></span></code></pre></div><p>简单讲讲上面的逻辑</p>
+<ul>
+<li>
+<p>第一种情况为传入的表达式首尾已经被括号包围，这里用flag来进行判断</p>
+<p>①形如 (20) + (30) 表达式合法，但返回false</p>
+<p>②形如 (20 + 30) 表达式合法， 返回true</p>
+<p>③表达式非法</p>
+</li>
+<li>
+<p>第二种情况为传入的整个表达式并没有被括号包围，此时又有两种情况：</p>
+<p>①表达式非法，那么直接<code>*valid = false</code>即可</p>
+<p>②表达式合法，可继续求值，设置<code>*valid = true; return false</code>即可</p>
+</li>
+</ul>
+<p>最后是找主运算符<code>find_major()</code>的实现</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1">int</span> <span style="color:#88c0d0">find_major</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">int</span> p<span style="color:#eceff4">,</span> <span style="color:#81a1c1">int</span> q<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">int</span> ret <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">-</span><span style="color:#b48ead">1</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">int</span> paren <span style="color:#81a1c1">=</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span> <span style="color:#616e87;font-style:italic">//count parenthese
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic"></span>    <span style="color:#81a1c1">int</span> priority <span style="color:#81a1c1">=</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">for</span> <span style="color:#eceff4">(</span><span style="color:#81a1c1">int</span> i <span style="color:#81a1c1">=</span> p<span style="color:#eceff4">;</span> i <span style="color:#81a1c1">&lt;=</span> q<span style="color:#eceff4">;</span> i<span style="color:#81a1c1">++</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>i<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">==</span> TK_NUM<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1;font-weight:bold">continue</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">else</span> <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>i<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">==</span> <span style="color:#a3be8c">&#39;(&#39;</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>            paren<span style="color:#81a1c1">++</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">else</span> <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>i<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">==</span> <span style="color:#a3be8c">&#39;)&#39;</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>paren <span style="color:#81a1c1">==</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#81a1c1">-</span><span style="color:#b48ead">1</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>            paren<span style="color:#81a1c1">--</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">else</span> <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>paren <span style="color:#81a1c1">&gt;</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1;font-weight:bold">continue</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">else</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1">int</span> temp_prio<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1;font-weight:bold">switch</span> <span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>i<span style="color:#eceff4">].</span>type<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1;font-weight:bold">case</span> <span style="color:#a3be8c">&#39;*&#39;</span><span style="color:#81a1c1">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1;font-weight:bold">case</span> <span style="color:#a3be8c">&#39;/&#39;</span><span style="color:#81a1c1">:</span>
+</span></span><span style="display:flex;"><span>                temp_prio <span style="color:#81a1c1">=</span> <span style="color:#b48ead">1</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#81a1c1;font-weight:bold">break</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1;font-weight:bold">case</span> <span style="color:#a3be8c">&#39;+&#39;</span><span style="color:#81a1c1">:</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1;font-weight:bold">case</span> <span style="color:#a3be8c">&#39;-&#39;</span><span style="color:#81a1c1">:</span>
+</span></span><span style="display:flex;"><span>                temp_prio <span style="color:#81a1c1">=</span> <span style="color:#b48ead">2</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>                <span style="color:#81a1c1;font-weight:bold">break</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1;font-weight:bold">default</span><span style="color:#81a1c1">:</span> <span style="color:#88c0d0">assert</span><span style="color:#eceff4">(</span><span style="color:#b48ead">0</span><span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>temp_prio <span style="color:#81a1c1">&gt;=</span> priority<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>                priority <span style="color:#81a1c1">=</span> temp_prio<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>                ret <span style="color:#81a1c1">=</span> i<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">return</span> ret<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
+</span></span></code></pre></div><p>逻辑很简单，首先都是对表达式是否合法进行判断，唯一与<code>check_paratheses()</code>不同的一点是多了一个条件</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">else</span> <span style="color:#88c0d0">if</span> <span style="color:#eceff4">(</span>paren <span style="color:#81a1c1">&gt;</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>	<span style="color:#81a1c1;font-weight:bold">continue</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
+</span></span></code></pre></div><p>即在括号内的运算符不是主运算符</p>
+<p>最后判断一下优先级大小，返回优先级最小的符号位置即可</p>
+<h2 id="测试代码">测试代码<a hidden class="anchor" aria-hidden="true" href="#测试代码">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#616e87;font-style:italic">/*Test my funtion expr()*/</span>
+</span></span><span style="display:flex;"><span>FILE<span style="color:#81a1c1">*</span> file <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">fopen</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;/home/sino/PA/ics2024/nemu/tools/gen-expr/build/input&#34;</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#34;r&#34;</span><span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span><span style="color:#81a1c1">!</span>file<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#88c0d0">assert</span><span style="color:#eceff4">(</span><span style="color:#b48ead">0</span><span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1">char</span> line<span style="color:#eceff4">[</span><span style="color:#b48ead">256</span><span style="color:#eceff4">];</span>
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">while</span> <span style="color:#eceff4">(</span><span style="color:#88c0d0">fgets</span><span style="color:#eceff4">(</span>line<span style="color:#eceff4">,</span> <span style="color:#81a1c1;font-weight:bold">sizeof</span><span style="color:#eceff4">(</span>line<span style="color:#eceff4">),</span> file<span style="color:#eceff4">))</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">unsigned</span> <span style="color:#81a1c1">int</span> expected_result<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">char</span> expression<span style="color:#eceff4">[</span><span style="color:#b48ead">256</span><span style="color:#eceff4">];</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">bool</span> valid<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#88c0d0">sscanf</span><span style="color:#eceff4">(</span>line<span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#34;%u %[^</span><span style="color:#ebcb8b">\n</span><span style="color:#a3be8c">]&#34;</span><span style="color:#eceff4">,</span> <span style="color:#81a1c1">&amp;</span>expected_result<span style="color:#eceff4">,</span> expression<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#616e87;font-style:italic">// Call expr function
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic"></span>    <span style="color:#81a1c1">word_t</span> result <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">expr</span><span style="color:#eceff4">(</span>expression<span style="color:#eceff4">,</span> <span style="color:#81a1c1">&amp;</span>valid<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#88c0d0">printf</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;the expr result is: %d</span><span style="color:#ebcb8b">\n</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">,</span> result<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#616e87;font-style:italic">// Compare results
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic"></span>    <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>valid <span style="color:#81a1c1">==</span> <span style="color:#81a1c1">true</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>result <span style="color:#81a1c1">==</span> expected_result<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#88c0d0">printf</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;Success: %u = %s</span><span style="color:#ebcb8b">\n</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">,</span> result<span style="color:#eceff4">,</span> expression<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">else</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#88c0d0">printf</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;Mismatch: %u (calculated) != %u (expected) for expression: %s</span><span style="color:#ebcb8b">\n</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">,</span> result<span style="color:#eceff4">,</span> expected_result<span style="color:#eceff4">,</span> expression<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">else</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#88c0d0">printf</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;Invalid expression: %s</span><span style="color:#ebcb8b">\n</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">,</span> expression<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
+</span></span></code></pre></div><p>按照手册上的来做就行，没什么特别的</p>
+<h2 id="选做题">选做题<a hidden class="anchor" aria-hidden="true" href="#选做题">#</a></h2>
+<h3 id="负号的实现">负号的实现<a hidden class="anchor" aria-hidden="true" href="#负号的实现">#</a></h3>
+<p>给定一个新的<code>token</code>类型<code>TK_NEG</code>来标识负号，具体处理思路是在处理完token之后，且在进入表达式求值之前，将满足条件的<code>token</code>类型改为<code>TK_NEG</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">for</span> <span style="color:#eceff4">(</span><span style="color:#81a1c1">int</span> i <span style="color:#81a1c1">=</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span> i <span style="color:#81a1c1">&lt;</span> nr_token<span style="color:#eceff4">;</span> i<span style="color:#81a1c1">++</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>i <span style="color:#81a1c1">==</span> <span style="color:#b48ead">0</span> <span style="color:#81a1c1">||</span> <span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>i <span style="color:#81a1c1">-</span> <span style="color:#b48ead">1</span><span style="color:#eceff4">].</span>type <span style="color:#81a1c1">!=</span> <span style="color:#a3be8c">&#39;)&#39;</span> <span style="color:#81a1c1">&amp;&amp;</span> tokens<span style="color:#eceff4">[</span>i <span style="color:#81a1c1">-</span> <span style="color:#b48ead">1</span><span style="color:#eceff4">].</span>type <span style="color:#81a1c1">!=</span> TK_NUM<span style="color:#eceff4">))</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>i<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">==</span> <span style="color:#a3be8c">&#39;-&#39;</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>            tokens<span style="color:#eceff4">[</span>i<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">=</span> TK_NEG<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
+</span></span></code></pre></div><p>负号可以看作是一元运算符，与之前所编写的二元运算符不同，一元运算符只有一个操作数</p>
+<p>仿照二元运算操作，在找到主运算符之后，就需要将左右两个表达式与主运算符进行运算，那么一元运算符逻辑也应当如此</p>
+<p>所以应当在<code>find_major()</code>函数中做出区分，设定若找不到二元运算符则返回<code>-1</code>表明此为一元运算符</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">default</span><span style="color:#81a1c1">:</span> temp_prio <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">-</span><span style="color:#b48ead">1</span><span style="color:#eceff4">;</span> <span style="color:#616e87;font-style:italic">// no binary operator
+</span></span></span></code></pre></div><p>之后给出单独的处理逻辑即可</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>op <span style="color:#81a1c1">&lt;</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#616e87;font-style:italic">// If no major operator, we need to check for unary operators
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic"></span>    <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>p<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">==</span> TK_NEG<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#616e87;font-style:italic">// Handle unary negation
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic"></span>        <span style="color:#81a1c1">word_t</span> val <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">eval</span><span style="color:#eceff4">(</span>p <span style="color:#81a1c1">+</span> <span style="color:#b48ead">1</span><span style="color:#eceff4">,</span> q<span style="color:#eceff4">,</span> valid<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#81a1c1">-</span>val<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">*</span>valid <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">false</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
+</span></span></code></pre></div><p>PA 1-2结束</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="next" href="http://localhost:1313/posts/ics_pa_1-1/">
+    <span class="title">Next »</span>
+    <br>
+    <span>ICS PA 1-1 基础设施</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="http://localhost:1313/">Yang2KF&#39;s blog</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+<script>
+    (function(u, c) {
+      var d = document, t = 'script', o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function(e) { c(e); }); }
+      s.parentNode.insertBefore(o, s);
+    })('//cdn.bootcss.com/pangu/4.0.7/pangu.min.js', function() {
+      pangu.spacingPage();
+    });
+</script>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

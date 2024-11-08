@@ -4,7 +4,7 @@
     <title>Posts on Yang2KF&#39;s blog</title>
     <link>https://Yang2KF.github.io/posts/</link>
     <description>Recent content in Posts on Yang2KF&#39;s blog</description>
-    <generator>Hugo -- 0.136.5</generator>
+    <generator>Hugo -- 0.138.0</generator>
     <language>en-us</language>
     <lastBuildDate>Fri, 01 Nov 2024 22:33:12 +0800</lastBuildDate>
     <atom:link href="https://Yang2KF.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
@@ -14,7 +14,7 @@
       <pubDate>Fri, 01 Nov 2024 22:33:12 +0800</pubDate>
       <guid>https://Yang2KF.github.io/posts/ics_pa_1-1/</guid>
       <description>&lt;p&gt;本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。&lt;/p&gt;
-&lt;h3 id=&#34;单步执行&#34;&gt;单步执行&lt;/h3&gt;
+&lt;h2 id=&#34;单步执行&#34;&gt;单步执行&lt;/h2&gt;
 &lt;p&gt;根据文档中提到的字符串处理函数即可，此处使用&lt;code&gt;strtok()&lt;/code&gt;, &lt;code&gt;sscanf()&lt;/code&gt; 进行处理&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#81a1c1;font-weight:bold&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color:#81a1c1&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color:#88c0d0&#34;&gt;cmd_si&lt;/span&gt;&lt;span style=&#34;color:#eceff4&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#81a1c1&#34;&gt;char&lt;/span&gt; &lt;span style=&#34;color:#81a1c1&#34;&gt;*&lt;/span&gt;args&lt;span style=&#34;color:#eceff4&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#eceff4&#34;&gt;{&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#616e87;font-style:italic&#34;&gt;/*extract the first argument*/&lt;/span&gt;
@@ -36,7 +36,7 @@
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#81a1c1&#34;&gt;char&lt;/span&gt; &lt;span style=&#34;color:#81a1c1&#34;&gt;*&lt;/span&gt;cmd &lt;span style=&#34;color:#81a1c1&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#88c0d0&#34;&gt;strtok&lt;/span&gt;&lt;span style=&#34;color:#eceff4&#34;&gt;(&lt;/span&gt;str&lt;span style=&#34;color:#eceff4&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#a3be8c&#34;&gt;&amp;#34; &amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#eceff4&#34;&gt;);&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;在后续的调用中，因为所处理的都是同一个字符串，第一个参数&lt;code&gt;str&lt;/code&gt;则必须为&lt;strong&gt;NULL&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;sscanf()&lt;/code&gt;则将&lt;code&gt;char *&lt;/code&gt;类型的参数转换为&lt;code&gt;int&lt;/code&gt;，便于函数&lt;code&gt;cpu_exec()&lt;/code&gt;执行&lt;/p&gt;
-&lt;h3 id=&#34;打印寄存器&#34;&gt;打印寄存器&lt;/h3&gt;
+&lt;h2 id=&#34;打印寄存器&#34;&gt;打印寄存器&lt;/h2&gt;
 &lt;p&gt;仿照gdb格式同时打印十六进制和十进制的地址值，按照手册提示调用&lt;code&gt;isa_reg_display()&lt;/code&gt;即可&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#81a1c1;font-weight:bold&#34;&gt;static&lt;/span&gt; &lt;span style=&#34;color:#81a1c1&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color:#88c0d0&#34;&gt;cmd_info&lt;/span&gt;&lt;span style=&#34;color:#eceff4&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#81a1c1&#34;&gt;char&lt;/span&gt; &lt;span style=&#34;color:#81a1c1&#34;&gt;*&lt;/span&gt;args&lt;span style=&#34;color:#eceff4&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#eceff4&#34;&gt;{&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;    &lt;span style=&#34;color:#81a1c1&#34;&gt;char&lt;/span&gt; &lt;span style=&#34;color:#81a1c1&#34;&gt;*&lt;/span&gt;arg &lt;span style=&#34;color:#81a1c1&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#88c0d0&#34;&gt;strtok&lt;/span&gt;&lt;span style=&#34;color:#eceff4&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color:#81a1c1&#34;&gt;NULL&lt;/span&gt;&lt;span style=&#34;color:#eceff4&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color:#a3be8c&#34;&gt;&amp;#34; &amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#eceff4&#34;&gt;);&lt;/span&gt;
@@ -63,7 +63,7 @@
       <guid>https://Yang2KF.github.io/posts/hugo-githubpages/</guid>
       <description>&lt;p&gt;本文默认已有一定的git与命令行基础&lt;br&gt;
 配置环境: Ubuntu 22.04.5 LTS&lt;/p&gt;
-&lt;h3 id=&#34;安装hugo&#34;&gt;安装Hugo&lt;/h3&gt;
+&lt;h2 id=&#34;安装hugo&#34;&gt;安装Hugo&lt;/h2&gt;
 &lt;p&gt;使用Snap包管理器（安装方法有多种，可自行选择，此处选择较为简便的方式）&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;sudo snap install hugo
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;查看hugo版本&lt;/p&gt;
@@ -72,7 +72,7 @@
 &lt;/p&gt;
 &lt;p&gt;如果显示找不到该命令，则在&lt;code&gt;~/.bashrc&lt;/code&gt;设置一下环境变量即可&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#81a1c1&#34;&gt;export&lt;/span&gt; PATH&lt;span style=&#34;color:#81a1c1&#34;&gt;=&lt;/span&gt;$PATH:/snap/bin
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;创建站点&#34;&gt;创建站点&lt;/h3&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;创建站点&#34;&gt;创建站点&lt;/h2&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;hugo new site Start
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;执行命令之后，进入你所创建的站点目录（下文统称此目录为&lt;strong&gt;根目录&lt;/strong&gt;），会看见像这样的文件结构&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;├── archetypes   
@@ -89,7 +89,7 @@
 &lt;li&gt; assets: 可自定义css，js &lt;/li&gt;
 &lt;li&gt; layouts: 可自定义html生成模板 &lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;选择合适的主题&#34;&gt;选择合适的主题&lt;/h3&gt;
+&lt;h2 id=&#34;选择合适的主题&#34;&gt;选择合适的主题&lt;/h2&gt;
 &lt;p&gt;为避免本地仓库与远程仓库分支名称不一致的冲突，建议将git主分支名称设置为&lt;code&gt;main&lt;/code&gt;，与GitHub默认主分支名称保持一致&lt;/p&gt;
 &lt;p&gt;首先将根目录初始化为本地git仓库&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git init
