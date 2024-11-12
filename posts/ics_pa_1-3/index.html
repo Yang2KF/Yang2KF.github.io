@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>ICS PA 1-3 监视点 | Yang2KF&#39;s blog</title>
+<meta name="keywords" content="">
+<meta name="description" content="本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。
+扩展表达式求值
+由于之前已经打好了大的框架，剩下的这些实现起来都很简单，对于像==，&amp;&amp;，!=这些二元运算符，将其添加到之前处理加减乘除的位置即可；对于指针解引用，寄存器的识别，跟之前的负号处理基本一致
+这里针对寄存器，可以将$看作是一个一元运算符，也可以像我这样直接在make_token()函数中提前处理好
+switch (rules[i].token_type) {
+    case TK_NUM:
+    case TK_HEX:
+        strncpy(tokens[nr_token].str, substr_start, substr_len);
+        tokens[nr_token].str[substr_len] = &#39;\0&#39;;
+        break;
+    case TK_REG:
+        strncpy(tokens[nr_token].str, substr_start &#43; 1, substr_len - 1); // skip the &#34;$&#34;
+        tokens[nr_token].str[substr_len] = &#39;\0&#39;;
+        break;
+}
+识别成功后直接将$符号后的寄存器名称存入token
+获取寄存器的值不多说，直接返回cpu.gpr[i]即可
+实现监视点
+首先补全框架提供的两个函数，其实就是基础的链表插入删除操作
+WP* new_wp() {
+  if(free_ != NULL) {
+    WP *wp = free_;
+    free_ = free_-&gt;next;
+
+    wp-&gt;next = head;
+    head = wp;
+    return head;
+  }
+  else assert(0);
+}
+这里我将free_wp()的参数修改为了监视点的编号，方便后续调用
+void free_wp(int no) {
+  WP *cur = head;
+  WP *pre = NULL;
+  /*find the target watch point*/
+  while(cur != NULL) {
+    if(cur-&gt;NO == no) {
+      break;
+    }
+    pre = cur;
+    cur = cur-&gt;next;
+  }
+
+  /*move it form head to free_*/
+  if(cur != NULL) {
+    if(pre != NULL) {
+      pre-&gt;next = cur-&gt;next;
+    }
+    else 
+      head = cur-&gt;next;
+  }
+
+  cur-&gt;next = free_;
+  free_ = cur;
+}
+为了能够实现监视点的作用，如打印旧的值，我们还需要在监视点结构中加入几个成员变量expr，old
+并且要接收从new_wp()函数中返回来的空闲监视点，并设置相应数据，需要新建一个函数配合">
+<meta name="author" content="">
+<link rel="canonical" href="https://Yang2KF.github.io/posts/ics_pa_1-3/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.778d247b40839112d8aa3a44faf102781aba3c65b190397f9249ba63c14a687f.css" integrity="sha256-d40ke0CDkRLYqjpE&#43;vECeBq6PGWxkDl/kkm6Y8FKaH8=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://Yang2KF.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://Yang2KF.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://Yang2KF.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://Yang2KF.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://Yang2KF.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://Yang2KF.github.io/posts/ics_pa_1-3/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="ICS PA 1-3 监视点" />
+<meta property="og:description" content="本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。
+扩展表达式求值
+由于之前已经打好了大的框架，剩下的这些实现起来都很简单，对于像==，&amp;&amp;，!=这些二元运算符，将其添加到之前处理加减乘除的位置即可；对于指针解引用，寄存器的识别，跟之前的负号处理基本一致
+这里针对寄存器，可以将$看作是一个一元运算符，也可以像我这样直接在make_token()函数中提前处理好
+switch (rules[i].token_type) {
+    case TK_NUM:
+    case TK_HEX:
+        strncpy(tokens[nr_token].str, substr_start, substr_len);
+        tokens[nr_token].str[substr_len] = &#39;\0&#39;;
+        break;
+    case TK_REG:
+        strncpy(tokens[nr_token].str, substr_start &#43; 1, substr_len - 1); // skip the &#34;$&#34;
+        tokens[nr_token].str[substr_len] = &#39;\0&#39;;
+        break;
+}
+识别成功后直接将$符号后的寄存器名称存入token
+获取寄存器的值不多说，直接返回cpu.gpr[i]即可
+实现监视点
+首先补全框架提供的两个函数，其实就是基础的链表插入删除操作
+WP* new_wp() {
+  if(free_ != NULL) {
+    WP *wp = free_;
+    free_ = free_-&gt;next;
+
+    wp-&gt;next = head;
+    head = wp;
+    return head;
+  }
+  else assert(0);
+}
+这里我将free_wp()的参数修改为了监视点的编号，方便后续调用
+void free_wp(int no) {
+  WP *cur = head;
+  WP *pre = NULL;
+  /*find the target watch point*/
+  while(cur != NULL) {
+    if(cur-&gt;NO == no) {
+      break;
+    }
+    pre = cur;
+    cur = cur-&gt;next;
+  }
+
+  /*move it form head to free_*/
+  if(cur != NULL) {
+    if(pre != NULL) {
+      pre-&gt;next = cur-&gt;next;
+    }
+    else 
+      head = cur-&gt;next;
+  }
+
+  cur-&gt;next = free_;
+  free_ = cur;
+}
+为了能够实现监视点的作用，如打印旧的值，我们还需要在监视点结构中加入几个成员变量expr，old
+并且要接收从new_wp()函数中返回来的空闲监视点，并设置相应数据，需要新建一个函数配合" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Yang2KF.github.io/posts/ics_pa_1-3/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-11-12T22:53:05+08:00" />
+<meta property="article:modified_time" content="2024-11-12T22:53:05+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="ICS PA 1-3 监视点"/>
+<meta name="twitter:description" content="本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。
+扩展表达式求值
+由于之前已经打好了大的框架，剩下的这些实现起来都很简单，对于像==，&amp;&amp;，!=这些二元运算符，将其添加到之前处理加减乘除的位置即可；对于指针解引用，寄存器的识别，跟之前的负号处理基本一致
+这里针对寄存器，可以将$看作是一个一元运算符，也可以像我这样直接在make_token()函数中提前处理好
+switch (rules[i].token_type) {
+    case TK_NUM:
+    case TK_HEX:
+        strncpy(tokens[nr_token].str, substr_start, substr_len);
+        tokens[nr_token].str[substr_len] = &#39;\0&#39;;
+        break;
+    case TK_REG:
+        strncpy(tokens[nr_token].str, substr_start &#43; 1, substr_len - 1); // skip the &#34;$&#34;
+        tokens[nr_token].str[substr_len] = &#39;\0&#39;;
+        break;
+}
+识别成功后直接将$符号后的寄存器名称存入token
+获取寄存器的值不多说，直接返回cpu.gpr[i]即可
+实现监视点
+首先补全框架提供的两个函数，其实就是基础的链表插入删除操作
+WP* new_wp() {
+  if(free_ != NULL) {
+    WP *wp = free_;
+    free_ = free_-&gt;next;
+
+    wp-&gt;next = head;
+    head = wp;
+    return head;
+  }
+  else assert(0);
+}
+这里我将free_wp()的参数修改为了监视点的编号，方便后续调用
+void free_wp(int no) {
+  WP *cur = head;
+  WP *pre = NULL;
+  /*find the target watch point*/
+  while(cur != NULL) {
+    if(cur-&gt;NO == no) {
+      break;
+    }
+    pre = cur;
+    cur = cur-&gt;next;
+  }
+
+  /*move it form head to free_*/
+  if(cur != NULL) {
+    if(pre != NULL) {
+      pre-&gt;next = cur-&gt;next;
+    }
+    else 
+      head = cur-&gt;next;
+  }
+
+  cur-&gt;next = free_;
+  free_ = cur;
+}
+为了能够实现监视点的作用，如打印旧的值，我们还需要在监视点结构中加入几个成员变量expr，old
+并且要接收从new_wp()函数中返回来的空闲监视点，并设置相应数据，需要新建一个函数配合"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://Yang2KF.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "ICS PA 1-3 监视点",
+      "item": "https://Yang2KF.github.io/posts/ics_pa_1-3/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ICS PA 1-3 监视点",
+  "name": "ICS PA 1-3 监视点",
+  "description": "本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。\n扩展表达式求值 由于之前已经打好了大的框架，剩下的这些实现起来都很简单，对于像==，\u0026amp;\u0026amp;，!=这些二元运算符，将其添加到之前处理加减乘除的位置即可；对于指针解引用，寄存器的识别，跟之前的负号处理基本一致\n这里针对寄存器，可以将$看作是一个一元运算符，也可以像我这样直接在make_token()函数中提前处理好\nswitch (rules[i].token_type) { case TK_NUM: case TK_HEX: strncpy(tokens[nr_token].str, substr_start, substr_len); tokens[nr_token].str[substr_len] = \u0026#39;\\0\u0026#39;; break; case TK_REG: strncpy(tokens[nr_token].str, substr_start + 1, substr_len - 1); // skip the \u0026#34;$\u0026#34; tokens[nr_token].str[substr_len] = \u0026#39;\\0\u0026#39;; break; } 识别成功后直接将$符号后的寄存器名称存入token 获取寄存器的值不多说，直接返回cpu.gpr[i]即可\n实现监视点 首先补全框架提供的两个函数，其实就是基础的链表插入删除操作\nWP* new_wp() { if(free_ != NULL) { WP *wp = free_; free_ = free_-\u0026gt;next; wp-\u0026gt;next = head; head = wp; return head; } else assert(0); } 这里我将free_wp()的参数修改为了监视点的编号，方便后续调用\nvoid free_wp(int no) { WP *cur = head; WP *pre = NULL; /*find the target watch point*/ while(cur != NULL) { if(cur-\u0026gt;NO == no) { break; } pre = cur; cur = cur-\u0026gt;next; } /*move it form head to free_*/ if(cur != NULL) { if(pre != NULL) { pre-\u0026gt;next = cur-\u0026gt;next; } else head = cur-\u0026gt;next; } cur-\u0026gt;next = free_; free_ = cur; } 为了能够实现监视点的作用，如打印旧的值，我们还需要在监视点结构中加入几个成员变量expr，old 并且要接收从new_wp()函数中返回来的空闲监视点，并设置相应数据，需要新建一个函数配合\n",
+  "keywords": [
+    
+  ],
+  "articleBody": "本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。\n扩展表达式求值 由于之前已经打好了大的框架，剩下的这些实现起来都很简单，对于像==，\u0026\u0026，!=这些二元运算符，将其添加到之前处理加减乘除的位置即可；对于指针解引用，寄存器的识别，跟之前的负号处理基本一致\n这里针对寄存器，可以将$看作是一个一元运算符，也可以像我这样直接在make_token()函数中提前处理好\nswitch (rules[i].token_type) { case TK_NUM: case TK_HEX: strncpy(tokens[nr_token].str, substr_start, substr_len); tokens[nr_token].str[substr_len] = '\\0'; break; case TK_REG: strncpy(tokens[nr_token].str, substr_start + 1, substr_len - 1); // skip the \"$\" tokens[nr_token].str[substr_len] = '\\0'; break; } 识别成功后直接将$符号后的寄存器名称存入token 获取寄存器的值不多说，直接返回cpu.gpr[i]即可\n实现监视点 首先补全框架提供的两个函数，其实就是基础的链表插入删除操作\nWP* new_wp() { if(free_ != NULL) { WP *wp = free_; free_ = free_-\u003enext; wp-\u003enext = head; head = wp; return head; } else assert(0); } 这里我将free_wp()的参数修改为了监视点的编号，方便后续调用\nvoid free_wp(int no) { WP *cur = head; WP *pre = NULL; /*find the target watch point*/ while(cur != NULL) { if(cur-\u003eNO == no) { break; } pre = cur; cur = cur-\u003enext; } /*move it form head to free_*/ if(cur != NULL) { if(pre != NULL) { pre-\u003enext = cur-\u003enext; } else head = cur-\u003enext; } cur-\u003enext = free_; free_ = cur; } 为了能够实现监视点的作用，如打印旧的值，我们还需要在监视点结构中加入几个成员变量expr，old 并且要接收从new_wp()函数中返回来的空闲监视点，并设置相应数据，需要新建一个函数配合\nvoid set_wp(char *expr, word_t res) { WP *wp = new_wp(); wp-\u003eexpr = malloc(strlen(expr) + 1); strcpy(wp-\u003eexpr, expr); wp-\u003eold = res; printf(\"Watch point:%d: %s\\n\", wp-\u003eNO, wp-\u003eexpr); } 之后为了在trace_and_difftest()函数中扫描所有的监视点，我们需要增加一个函数difftest_wp()，并且编写相应的Kconfig\nbool difftest_wp() { bool valid = true; WP *wp = head; while(wp != NULL) { word_t new = expr(wp-\u003eexpr, \u0026valid); if(new != wp-\u003eold) { printf(\"Watchpoint %d: %s is triggered!\\n\", wp-\u003eNO, wp-\u003eexpr); printf(\"Old value = 0x%08x\\n\", wp-\u003eold); printf(\"New value = 0x%08x\\n\", new); wp-\u003eold = new; return true; } wp = wp-\u003enext; } return false; } 仿照Kconfig已经含有的的配置，琢磨了一下写了一个监视点配置，运行起来也没问题，有问题后面再改\nchoice prompt \"Watch point configuration\" default ENABLE_WATCHPOINT config ENABLE_WATCHPOINT bool \"enabled\" config DISABLE_WATCHPOINT bool \"disabled\" endchoice 打开图形界面，能够正常显示 最后添加相应trace_and_difftest()逻辑即可\nstatic void trace_and_difftest(Decode *_this, vaddr_t dnpc) { #ifdef CONFIG_ITRACE_COND if (ITRACE_COND) { log_write(\"%s\\n\", _this-\u003elogbuf); } #endif if (g_print_step) { IFDEF(CONFIG_ITRACE, puts(_this-\u003elogbuf)); } IFDEF(CONFIG_DIFFTEST, difftest_step(_this-\u003epc, dnpc)); #ifdef CONFIG_ENABLE_WATCHPOINT if(difftest_wp()) { nemu_state.state = NEMU_STOP; } #endif } 其他的像打印监视点不再过多赘述，最后还需要在sdb.c完成相应的指令函数\n实现断点 按照手册上操作发现表达式会报错，原因是寄存器数组并没有包含pc，发现pc包含在了cpu结构体里，直接返回cpu.pc即可\n打印行数 在nemu/script/native.mk添加即可\ncount: @find $(NEMU_HOME)/ -name \"*.c\" -o -name \"*.h\" | xargs wc -l count_no_blank: @find $(NEMU_HOME)/ -name \"*.c\" -o -name \"*.h\" | xargs grep -v '^\\s*$$' | wc -l 具体MakeFile的编写规则可以参照 https://seisman.github.io/how-to-write-makefile/index.html\nPA 1-3结束\n",
+  "wordCount" : "305",
+  "inLanguage": "en",
+  "datePublished": "2024-11-12T22:53:05+08:00",
+  "dateModified": "2024-11-12T22:53:05+08:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://Yang2KF.github.io/posts/ics_pa_1-3/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Yang2KF's blog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://Yang2KF.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://Yang2KF.github.io/" accesskey="h" title="Yang2KF&#39;s blog (Alt + H)">Yang2KF&#39;s blog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://Yang2KF.github.io/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://Yang2KF.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://Yang2KF.github.io/categories/" title="Categories">
+                    <span>Categories</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://Yang2KF.github.io/archives/" title="Archives">
+                    <span>Archives</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://Yang2KF.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://Yang2KF.github.io/">Home</a>&nbsp;»&nbsp;<a href="https://Yang2KF.github.io/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      ICS PA 1-3 监视点
+    </h1>
+    <div class="post-meta"><span title='2024-11-12 22:53:05 +0800 CST'>November 12, 2024</span>&nbsp;·&nbsp;2 min
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#%e6%89%a9%e5%b1%95%e8%a1%a8%e8%be%be%e5%bc%8f%e6%b1%82%e5%80%bc" aria-label="扩展表达式求值">扩展表达式求值</a></li>
+                <li>
+                    <a href="#%e5%ae%9e%e7%8e%b0%e7%9b%91%e8%a7%86%e7%82%b9" aria-label="实现监视点">实现监视点</a></li>
+                <li>
+                    <a href="#%e5%ae%9e%e7%8e%b0%e6%96%ad%e7%82%b9" aria-label="实现断点">实现断点</a></li>
+                <li>
+                    <a href="#%e6%89%93%e5%8d%b0%e8%a1%8c%e6%95%b0" aria-label="打印行数">打印行数</a>
+                </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。</p>
+<h2 id="扩展表达式求值">扩展表达式求值<a hidden class="anchor" aria-hidden="true" href="#扩展表达式求值">#</a></h2>
+<p>由于之前已经打好了大的框架，剩下的这些实现起来都很简单，对于像<code>==</code>，<code>&amp;&amp;</code>，<code>!=</code>这些二元运算符，将其添加到之前处理加减乘除的位置即可；对于指针解引用，寄存器的识别，跟之前的负号处理基本一致</p>
+<p>这里针对寄存器，可以将<code>$</code>看作是一个一元运算符，也可以像我这样直接在<code>make_token()</code>函数中提前处理好</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">switch</span> <span style="color:#eceff4">(</span>rules<span style="color:#eceff4">[</span>i<span style="color:#eceff4">].</span>token_type<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">case</span> <span style="color:#8fbcbb">TK_NUM</span><span style="color:#eceff4">:</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">case</span> <span style="color:#8fbcbb">TK_HEX</span><span style="color:#eceff4">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#88c0d0">strncpy</span><span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>nr_token<span style="color:#eceff4">].</span>str<span style="color:#eceff4">,</span> substr_start<span style="color:#eceff4">,</span> substr_len<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>        tokens<span style="color:#eceff4">[</span>nr_token<span style="color:#eceff4">].</span>str<span style="color:#eceff4">[</span>substr_len<span style="color:#eceff4">]</span> <span style="color:#81a1c1">=</span> <span style="color:#a3be8c">&#39;\0&#39;</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">break</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">case</span> <span style="color:#8fbcbb">TK_REG</span><span style="color:#eceff4">:</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#88c0d0">strncpy</span><span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>nr_token<span style="color:#eceff4">].</span>str<span style="color:#eceff4">,</span> substr_start <span style="color:#81a1c1">+</span> <span style="color:#b48ead">1</span><span style="color:#eceff4">,</span> substr_len <span style="color:#81a1c1">-</span> <span style="color:#b48ead">1</span><span style="color:#eceff4">);</span> <span style="color:#616e87;font-style:italic">// skip the &#34;$&#34;
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic"></span>        tokens<span style="color:#eceff4">[</span>nr_token<span style="color:#eceff4">].</span>str<span style="color:#eceff4">[</span>substr_len<span style="color:#eceff4">]</span> <span style="color:#81a1c1">=</span> <span style="color:#a3be8c">&#39;\0&#39;</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">break</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
+</span></span></code></pre></div><p>识别成功后直接将<code>$</code>符号后的寄存器名称存入<code>token</code>
+获取寄存器的值不多说，直接返回<code>cpu.gpr[i]</code>即可</p>
+<h2 id="实现监视点">实现监视点<a hidden class="anchor" aria-hidden="true" href="#实现监视点">#</a></h2>
+<p>首先补全框架提供的两个函数，其实就是基础的链表插入删除操作</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span>WP<span style="color:#81a1c1">*</span> <span style="color:#88c0d0">new_wp</span><span style="color:#eceff4">()</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#81a1c1;font-weight:bold">if</span><span style="color:#eceff4">(</span>free_ <span style="color:#81a1c1">!=</span> <span style="color:#81a1c1">NULL</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>    WP <span style="color:#81a1c1">*</span>wp <span style="color:#81a1c1">=</span> free_<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>    free_ <span style="color:#81a1c1">=</span> free_<span style="color:#81a1c1">-&gt;</span>next<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    wp<span style="color:#81a1c1">-&gt;</span>next <span style="color:#81a1c1">=</span> head<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>    head <span style="color:#81a1c1">=</span> wp<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">return</span> head<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#81a1c1;font-weight:bold">else</span> <span style="color:#88c0d0">assert</span><span style="color:#eceff4">(</span><span style="color:#b48ead">0</span><span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
+</span></span></code></pre></div><p>这里我将<code>free_wp()</code>的参数修改为了监视点的编号，方便后续调用</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1">void</span> <span style="color:#88c0d0">free_wp</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">int</span> no<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>  WP <span style="color:#81a1c1">*</span>cur <span style="color:#81a1c1">=</span> head<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>  WP <span style="color:#81a1c1">*</span>pre <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">NULL</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#616e87;font-style:italic">/*find the target watch point*/</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#81a1c1;font-weight:bold">while</span><span style="color:#eceff4">(</span>cur <span style="color:#81a1c1">!=</span> <span style="color:#81a1c1">NULL</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">if</span><span style="color:#eceff4">(</span>cur<span style="color:#81a1c1">-&gt;</span>NO <span style="color:#81a1c1">==</span> no<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#81a1c1;font-weight:bold">break</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>    pre <span style="color:#81a1c1">=</span> cur<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>    cur <span style="color:#81a1c1">=</span> cur<span style="color:#81a1c1">-&gt;</span>next<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#616e87;font-style:italic">/*move it form head to free_*/</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#81a1c1;font-weight:bold">if</span><span style="color:#eceff4">(</span>cur <span style="color:#81a1c1">!=</span> <span style="color:#81a1c1">NULL</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">if</span><span style="color:#eceff4">(</span>pre <span style="color:#81a1c1">!=</span> <span style="color:#81a1c1">NULL</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>      pre<span style="color:#81a1c1">-&gt;</span>next <span style="color:#81a1c1">=</span> cur<span style="color:#81a1c1">-&gt;</span>next<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">else</span> 
+</span></span><span style="display:flex;"><span>      head <span style="color:#81a1c1">=</span> cur<span style="color:#81a1c1">-&gt;</span>next<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  cur<span style="color:#81a1c1">-&gt;</span>next <span style="color:#81a1c1">=</span> free_<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>  free_ <span style="color:#81a1c1">=</span> cur<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
+</span></span></code></pre></div><p>为了能够实现监视点的作用，如打印旧的值，我们还需要在监视点结构中加入几个成员变量<code>expr</code>，<code>old</code>
+并且要接收从<code>new_wp()</code>函数中返回来的空闲监视点，并设置相应数据，需要新建一个函数配合</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1">void</span> <span style="color:#88c0d0">set_wp</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">char</span> <span style="color:#81a1c1">*</span>expr<span style="color:#eceff4">,</span>  <span style="color:#81a1c1">word_t</span> res<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>  WP <span style="color:#81a1c1">*</span>wp <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">new_wp</span><span style="color:#eceff4">();</span>
+</span></span><span style="display:flex;"><span>  wp<span style="color:#81a1c1">-&gt;</span>expr <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">malloc</span><span style="color:#eceff4">(</span><span style="color:#88c0d0">strlen</span><span style="color:#eceff4">(</span>expr<span style="color:#eceff4">)</span> <span style="color:#81a1c1">+</span> <span style="color:#b48ead">1</span><span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#88c0d0">strcpy</span><span style="color:#eceff4">(</span>wp<span style="color:#81a1c1">-&gt;</span>expr<span style="color:#eceff4">,</span> expr<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>  wp<span style="color:#81a1c1">-&gt;</span>old <span style="color:#81a1c1">=</span> res<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#88c0d0">printf</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;Watch point:%d: %s</span><span style="color:#ebcb8b">\n</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">,</span> wp<span style="color:#81a1c1">-&gt;</span>NO<span style="color:#eceff4">,</span> wp<span style="color:#81a1c1">-&gt;</span>expr<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
+</span></span></code></pre></div><p>之后为了在<code>trace_and_difftest()</code>函数中扫描所有的监视点，我们需要增加一个函数<code>difftest_wp()</code>，并且编写相应的Kconfig</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1">bool</span> <span style="color:#88c0d0">difftest_wp</span><span style="color:#eceff4">()</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#81a1c1">bool</span> valid <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">true</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>  WP <span style="color:#81a1c1">*</span>wp <span style="color:#81a1c1">=</span> head<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#81a1c1;font-weight:bold">while</span><span style="color:#eceff4">(</span>wp <span style="color:#81a1c1">!=</span> <span style="color:#81a1c1">NULL</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">word_t</span> new <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">expr</span><span style="color:#eceff4">(</span>wp<span style="color:#81a1c1">-&gt;</span>expr<span style="color:#eceff4">,</span> <span style="color:#81a1c1">&amp;</span>valid<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">if</span><span style="color:#eceff4">(</span>new <span style="color:#81a1c1">!=</span> wp<span style="color:#81a1c1">-&gt;</span>old<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#88c0d0">printf</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;Watchpoint %d: %s is triggered!</span><span style="color:#ebcb8b">\n</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">,</span> wp<span style="color:#81a1c1">-&gt;</span>NO<span style="color:#eceff4">,</span> wp<span style="color:#81a1c1">-&gt;</span>expr<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#88c0d0">printf</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;Old value = 0x%08x</span><span style="color:#ebcb8b">\n</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">,</span> wp<span style="color:#81a1c1">-&gt;</span>old<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#88c0d0">printf</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;New value = 0x%08x</span><span style="color:#ebcb8b">\n</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">,</span> new<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>      wp<span style="color:#81a1c1">-&gt;</span>old <span style="color:#81a1c1">=</span> new<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>      <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#81a1c1">true</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>    wp <span style="color:#81a1c1">=</span> wp<span style="color:#81a1c1">-&gt;</span>next<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#81a1c1">false</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
+</span></span></code></pre></div><p>仿照Kconfig已经含有的的配置，琢磨了一下写了一个监视点配置，运行起来也没问题，有问题后面再改</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>choice
+</span></span><span style="display:flex;"><span>    prompt &#34;Watch point configuration&#34;
+</span></span><span style="display:flex;"><span>    default ENABLE_WATCHPOINT
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>config ENABLE_WATCHPOINT
+</span></span><span style="display:flex;"><span>    bool &#34;enabled&#34;
+</span></span><span style="display:flex;"><span>config DISABLE_WATCHPOINT
+</span></span><span style="display:flex;"><span>    bool &#34;disabled&#34;
+</span></span><span style="display:flex;"><span>endchoice
+</span></span></code></pre></div><p>打开图形界面，能够正常显示
+<img loading="lazy" src="images/1.png" alt="image-1"  />
+
+最后添加相应<code>trace_and_difftest()</code>逻辑即可</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">static</span> <span style="color:#81a1c1">void</span> <span style="color:#88c0d0">trace_and_difftest</span><span style="color:#eceff4">(</span>Decode <span style="color:#81a1c1">*</span>_this<span style="color:#eceff4">,</span> <span style="color:#81a1c1">vaddr_t</span> dnpc<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span><span style="color:#5e81ac;font-style:italic">#ifdef CONFIG_ITRACE_COND
+</span></span></span><span style="display:flex;"><span><span style="color:#5e81ac;font-style:italic"></span>  <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>ITRACE_COND<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span> <span style="color:#88c0d0">log_write</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;%s</span><span style="color:#ebcb8b">\n</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">,</span> _this<span style="color:#81a1c1">-&gt;</span>logbuf<span style="color:#eceff4">);</span> <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#5e81ac;font-style:italic">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#5e81ac;font-style:italic"></span>  <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>g_print_step<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span> <span style="color:#88c0d0">IFDEF</span><span style="color:#eceff4">(</span>CONFIG_ITRACE<span style="color:#eceff4">,</span> <span style="color:#88c0d0">puts</span><span style="color:#eceff4">(</span>_this<span style="color:#81a1c1">-&gt;</span>logbuf<span style="color:#eceff4">));</span> <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#88c0d0">IFDEF</span><span style="color:#eceff4">(</span>CONFIG_DIFFTEST<span style="color:#eceff4">,</span> <span style="color:#88c0d0">difftest_step</span><span style="color:#eceff4">(</span>_this<span style="color:#81a1c1">-&gt;</span>pc<span style="color:#eceff4">,</span> dnpc<span style="color:#eceff4">));</span>
+</span></span><span style="display:flex;"><span><span style="color:#5e81ac;font-style:italic">#ifdef CONFIG_ENABLE_WATCHPOINT
+</span></span></span><span style="display:flex;"><span><span style="color:#5e81ac;font-style:italic"></span>  <span style="color:#81a1c1;font-weight:bold">if</span><span style="color:#eceff4">(</span><span style="color:#88c0d0">difftest_wp</span><span style="color:#eceff4">())</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>    nemu_state<span style="color:#eceff4">.</span>state <span style="color:#81a1c1">=</span> NEMU_STOP<span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span><span style="color:#5e81ac;font-style:italic">#endif
+</span></span></span><span style="display:flex;"><span><span style="color:#5e81ac;font-style:italic"></span><span style="color:#eceff4">}</span>
+</span></span></code></pre></div><p>其他的像打印监视点不再过多赘述，最后还需要在<code>sdb.c</code>完成相应的指令函数</p>
+<h2 id="实现断点">实现断点<a hidden class="anchor" aria-hidden="true" href="#实现断点">#</a></h2>
+<p>按照手册上操作发现表达式会报错，原因是寄存器数组并没有包含<code>pc</code>，发现<code>pc</code>包含在了<code>cpu</code>结构体里，直接返回<code>cpu.pc</code>即可</p>
+<h2 id="打印行数">打印行数<a hidden class="anchor" aria-hidden="true" href="#打印行数">#</a></h2>
+<p>在<code>nemu/script/native.mk</code>添加即可</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-makefile" data-lang="makefile"><span style="display:flex;"><span><span style="color:#88c0d0">count</span><span style="color:#81a1c1">:</span>
+</span></span><span style="display:flex;"><span>	@find <span style="color:#81a1c1;font-weight:bold">$(</span>NEMU_HOME<span style="color:#81a1c1;font-weight:bold">)</span>/ -name <span style="color:#a3be8c">&#34;*.c&#34;</span> -o -name <span style="color:#a3be8c">&#34;*.h&#34;</span> <span style="color:#eceff4">|</span> xargs wc -l
+</span></span><span style="display:flex;"><span><span style="color:#88c0d0">count_no_blank</span><span style="color:#81a1c1">:</span>
+</span></span><span style="display:flex;"><span>	@find <span style="color:#81a1c1;font-weight:bold">$(</span>NEMU_HOME<span style="color:#81a1c1;font-weight:bold">)</span>/ -name <span style="color:#a3be8c">&#34;*.c&#34;</span> -o -name <span style="color:#a3be8c">&#34;*.h&#34;</span> <span style="color:#eceff4">|</span> xargs grep -v <span style="color:#a3be8c">&#39;^\s*$$&#39;</span> <span style="color:#eceff4">|</span> wc -l
+</span></span></code></pre></div><p>具体<code>MakeFile</code>的编写规则可以参照 <a href="https://seisman.github.io/how-to-write-makefile/index.html">https://seisman.github.io/how-to-write-makefile/index.html</a></p>
+<p>PA 1-3结束</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="next" href="https://Yang2KF.github.io/posts/ics_pa_1-2/">
+    <span class="title">Next »</span>
+    <br>
+    <span>ICS PA 1-2 表达式求值</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://Yang2KF.github.io/">Yang2KF&#39;s blog</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+<script>
+    (function(u, c) {
+      var d = document, t = 'script', o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function(e) { c(e); }); }
+      s.parentNode.insertBefore(o, s);
+    })('//cdn.bootcss.com/pangu/4.0.7/pangu.min.js', function() {
+      pangu.spacingPage();
+    });
+</script>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

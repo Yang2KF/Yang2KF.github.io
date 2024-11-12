@@ -159,6 +159,42 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">ICS PA 1-3 监视点
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。
+扩展表达式求值 由于之前已经打好了大的框架，剩下的这些实现起来都很简单，对于像==，&amp;&amp;，!=这些二元运算符，将其添加到之前处理加减乘除的位置即可；对于指针解引用，寄存器的识别，跟之前的负号处理基本一致
+这里针对寄存器，可以将$看作是一个一元运算符，也可以像我这样直接在make_token()函数中提前处理好
+switch (rules[i].token_type) { case TK_NUM: case TK_HEX: strncpy(tokens[nr_token].str, substr_start, substr_len); tokens[nr_token].str[substr_len] = &#39;\0&#39;; break; case TK_REG: strncpy(tokens[nr_token].str, substr_start &#43; 1, substr_len - 1); // skip the &#34;$&#34; tokens[nr_token].str[substr_len] = &#39;\0&#39;; break; } 识别成功后直接将$符号后的寄存器名称存入token 获取寄存器的值不多说，直接返回cpu.gpr[i]即可
+实现监视点 首先补全框架提供的两个函数，其实就是基础的链表插入删除操作
+WP* new_wp() { if(free_ != NULL) { WP *wp = free_; free_ = free_-&gt;next; wp-&gt;next = head; head = wp; return head; } else assert(0); } 这里我将free_wp()的参数修改为了监视点的编号，方便后续调用
+void free_wp(int no) { WP *cur = head; WP *pre = NULL; /*find the target watch point*/ while(cur != NULL) { if(cur-&gt;NO == no) { break; } pre = cur; cur = cur-&gt;next; } /*move it form head to free_*/ if(cur != NULL) { if(pre != NULL) { pre-&gt;next = cur-&gt;next; } else head = cur-&gt;next; } cur-&gt;next = free_; free_ = cur; } 为了能够实现监视点的作用，如打印旧的值，我们还需要在监视点结构中加入几个成员变量expr，old 并且要接收从new_wp()函数中返回来的空闲监视点，并设置相应数据，需要新建一个函数配合
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-11-12 22:53:05 +0800 CST'>November 12, 2024</span>&nbsp;·&nbsp;2 min</footer>
+  <a class="entry-link" aria-label="post link to ICS PA 1-3 监视点" href="https://Yang2KF.github.io/posts/ics_pa_1-3/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
+    <h2 class="entry-hint-parent">ICS PA 1-2 表达式求值
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。
+词法分析 首先，针对简单算术运算符增加几条正则规则
+static struct rule { const char *regex; int token_type; } rules[] = { /* TODO: Add more rules. * Pay attention to the precedence level of different rules. */ {&#34; &#43;&#34;, TK_NOTYPE}, // spaces {&#34;\\&#43;&#34;, &#39;&#43;&#39;}, {&#34;==&#34;, TK_EQ}, // equal {&#34;-&#34;, &#39;-&#39;}, {&#34;\\*&#34;, &#39;*&#39;}, {&#34;/&#34;, &#39;/&#39;}, {&#34;\\(&#34;, &#39;(&#39;}, {&#34;\\)&#34;, &#39;)&#39;}, {&#34;[0-9]&#43;&#34;, TK_NUM} // numbers }; 注意，由于&#43;，*，(，)在正则表达式中属于元字符，有特殊含义，所以需要另一个元字符\将其转义，但是由于在C语言中\属于转义字符，为了在字符串中包含字面量\，我们需要将其转义，即为\\
+接下来完成token的识别，为保持简洁，已省略大部分起始代码
+static bool make_token(char* e) { //... while (e[position] != &#39;\0&#39;) { for (i = 0; i &lt; NR_REGEX; i&#43;&#43;) { if (regexec(&amp;re[i], e &#43; position, 1, &amp;pmatch, 0) == 0 &amp;&amp; pmatch.rm_so == 0) { //... if (rules[i].token_type == TK_NOTYPE) break; tokens[nr_token].type = rules[i].token_type; switch (rules[i].token_type) { case TK_NUM: strncpy(tokens[nr_token].str, substr_start, substr_len); tokens[nr_token].str[substr_len] = &#39;\0&#39;; break; } nr_token&#43;&#43;; break; } } //... } return true; } 通过阅读手册得知，regcomp()函数将提供的正则表达式转换为能够被regexec()识别的格式，而regexec()则开始对提供的字符串e进行匹配
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-11-04 21:12:07 +0800 CST'>November 4, 2024</span>&nbsp;·&nbsp;4 min</footer>
+  <a class="entry-link" aria-label="post link to ICS PA 1-2 表达式求值" href="https://Yang2KF.github.io/posts/ics_pa_1-2/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">ICS PA 1-1 基础设施
     </h2>
   </header>
@@ -171,10 +207,11 @@ char *cmd = strtok(str, &#34; &#34;); 在后续的调用中，因为所处理的
 sscanf()则将char *类型的参数转换为int，便于函数cpu_exec()执行
 打印寄存器 仿照gdb格式同时打印十六进制和十进制的地址值，按照手册提示调用isa_reg_display()即可
 static int cmd_info(char *args) { char *arg = strtok(NULL, &#34; &#34;); if (arg == NULL) { printf(&#34;No args.\n&#34;); } else if (strcmp(arg, &#34;r&#34;) == 0) { isa_reg_display(); } return 0; } 其中isa_reg_display()实现为
-void isa_reg_display() { int length = sizeof(regs) / sizeof(regs[0]); for (int i = 0; i &lt; length; i&#43;&#43;) { printf(&#34;%s 0x%x %d\n&#34;, regs[i], cpu.gpr[i], cpu.gpr[i]); } } 变量cpu的类型为CPU_state，在 /nemu/include/memory/isa.h可找到
+void isa_reg_display() { int length = sizeof(regs) / sizeof(regs[0]); for (int i = 0; i &lt; length; i&#43;&#43;) { printf(&#34;%-6s 0x%-12x %-10d\n&#34;, regs[i], gpr(i), gpr(i)); } } 变量cpu的类型为CPU_state，在 /nemu/include/memory/isa.h可找到
+扫描内存 在手册中RTFSC篇章已经提到，访问内存的实现在nemu/src/memory中
 ...</p>
   </div>
-  <footer class="entry-footer"><span title='2024-11-01 22:33:12 +0800 CST'>November 1, 2024</span>&nbsp;·&nbsp;1 min</footer>
+  <footer class="entry-footer"><span title='2024-11-01 22:33:12 +0800 CST'>November 1, 2024</span>&nbsp;·&nbsp;2 min</footer>
   <a class="entry-link" aria-label="post link to ICS PA 1-1 基础设施" href="https://Yang2KF.github.io/posts/ics_pa_1-1/"></a>
 </article>
 

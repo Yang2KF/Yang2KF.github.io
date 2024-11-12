@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" dir="auto">
 
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
@@ -60,16 +60,16 @@ static bool make_token(char* e) {
 }
 通过阅读手册得知，regcomp()函数将提供的正则表达式转换为能够被regexec()识别的格式，而regexec()则开始对提供的字符串e进行匹配">
 <meta name="author" content="">
-<link rel="canonical" href="http://localhost:1313/posts/ics_pa_1-2/">
+<link rel="canonical" href="https://Yang2KF.github.io/posts/ics_pa_1-2/">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.778d247b40839112d8aa3a44faf102781aba3c65b190397f9249ba63c14a687f.css" integrity="sha256-d40ke0CDkRLYqjpE&#43;vECeBq6PGWxkDl/kkm6Y8FKaH8=" rel="preload stylesheet" as="style">
-<link rel="icon" href="http://localhost:1313/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
-<link rel="apple-touch-icon" href="http://localhost:1313/apple-touch-icon.png">
-<link rel="mask-icon" href="http://localhost:1313/safari-pinned-tab.svg">
+<link rel="icon" href="https://Yang2KF.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://Yang2KF.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://Yang2KF.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://Yang2KF.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://Yang2KF.github.io/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" hreflang="en" href="http://localhost:1313/posts/ics_pa_1-2/">
+<link rel="alternate" hreflang="en" href="https://Yang2KF.github.io/posts/ics_pa_1-2/">
 <noscript>
     <style>
         #theme-toggle,
@@ -160,7 +160,7 @@ static bool make_token(char* e) {
 }
 通过阅读手册得知，regcomp()函数将提供的正则表达式转换为能够被regexec()识别的格式，而regexec()则开始对提供的字符串e进行匹配" />
 <meta property="og:type" content="article" />
-<meta property="og:url" content="http://localhost:1313/posts/ics_pa_1-2/" /><meta property="article:section" content="posts" />
+<meta property="og:url" content="https://Yang2KF.github.io/posts/ics_pa_1-2/" /><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2024-11-04T21:12:07+08:00" />
 <meta property="article:modified_time" content="2024-11-04T21:12:07+08:00" />
 
@@ -229,13 +229,13 @@ static bool make_token(char* e) {
       "@type": "ListItem",
       "position":  1 ,
       "name": "Posts",
-      "item": "http://localhost:1313/posts/"
+      "item": "https://Yang2KF.github.io/posts/"
     }, 
     {
       "@type": "ListItem",
       "position":  2 ,
       "name": "ICS PA 1-2 表达式求值",
-      "item": "http://localhost:1313/posts/ics_pa_1-2/"
+      "item": "https://Yang2KF.github.io/posts/ics_pa_1-2/"
     }
   ]
 }
@@ -250,21 +250,21 @@ static bool make_token(char* e) {
   "keywords": [
     
   ],
-  "articleBody": "本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。\n词法分析 首先，针对简单算术运算符增加几条正则规则\nstatic struct rule { const char *regex; int token_type; } rules[] = { /* TODO: Add more rules. * Pay attention to the precedence level of different rules. */ {\" +\", TK_NOTYPE}, // spaces {\"\\\\+\", '+'}, {\"==\", TK_EQ}, // equal {\"-\", '-'}, {\"\\\\*\", '*'}, {\"/\", '/'}, {\"\\\\(\", '('}, {\"\\\\)\", ')'}, {\"[0-9]+\", TK_NUM} // numbers }; 注意，由于+，*，(，)在正则表达式中属于元字符，有特殊含义，所以需要另一个元字符\\将其转义，但是由于在C语言中\\属于转义字符，为了在字符串中包含字面量\\，我们需要将其转义，即为\\\\\n接下来完成token的识别，为保持简洁，已省略大部分起始代码\nstatic bool make_token(char* e) { //... while (e[position] != '\\0') { for (i = 0; i \u003c NR_REGEX; i++) { if (regexec(\u0026re[i], e + position, 1, \u0026pmatch, 0) == 0 \u0026\u0026 pmatch.rm_so == 0) { //... if (rules[i].token_type == TK_NOTYPE) break; tokens[nr_token].type = rules[i].token_type; switch (rules[i].token_type) { case TK_NUM: strncpy(tokens[nr_token].str, substr_start, substr_len); tokens[nr_token].str[substr_len] = '\\0'; break; } nr_token++; break; } } //... } return true; } 通过阅读手册得知，regcomp()函数将提供的正则表达式转换为能够被regexec()识别的格式，而regexec()则开始对提供的字符串e进行匹配\n主要的逻辑是：只要不为空格类型TK_NOTYPE就认为识别成功，如果是数字类型TK_NUM就将数字记录到相应token的缓存区str即可\n递归求值 手册上提到’在求值过程中发现表达式不合法的时候, 应该给上层函数返回一个表示出错的标识’，此处使用valid标识表达式是否合法\nword_t eval(int p, int q, bool* valid) { *valid = true; if (p \u003e q) { /* Bad expression */ *valid = false; return 0; } else if (p == q) { /* Single token. * For now this token should be a number. * Return the value of the number. */ if (tokens[p].type != TK_NUM) { *valid = false; return 0; } word_t ret = strtol(tokens[p].str, NULL, 10); return ret; } else if (check_parentheses(p, q, valid) == true) { /* The expression is surrounded by a matched pair of parentheses. * If that is the case, just throw away the parentheses. */ return eval(p + 1, q - 1, valid); } else if (*valid == true) { int op = find_major(p, q); if (op \u003c 0) { *valid = false; return 0; } word_t val0 = eval(p, op - 1, valid); word_t val1 = eval(op + 1, q, valid); switch (tokens[op].type) { case '+': return val0 + val1; case '-': return val0 - val1; case '*': return val0 * val1; case '/': return val0 / val1; default: assert(-1); } } return 0; } 函数的逻辑较为简单，要注意的是我们在p==q是使用了strtol()函数将缓存在str中的数字转换为长整型，其中的参数10即代表十进制\ncheck_paratheses()的实现\nbool check_parentheses(int p, int q, bool* valid) { int paren = 0;//count paranthese if (tokens[p].type == '(' \u0026\u0026 tokens[q].type == ')') { bool flag = true; for (int i = p + 1; i \u003c q; i++) { if(tokens[i].type == ')' \u0026\u0026 (paren == 0) \u0026\u0026 flag) { flag = false; paren--; } if (tokens[i].type == '(') { paren++; } else if (tokens[i].type == ')') { if (paren == 0) { *valid = false; return false; //bad expression } paren--; } } return (paren == 0) \u0026\u0026 flag; } else { /*There are two situations, the one is bad expression, */ for (int i = p; i \u003c= q; i++) { if (tokens[i].type != '(' \u0026\u0026 tokens[i].type != ')') { continue; } else if (tokens[i].type == '(') { paren++; } else if (tokens[i].type == ')') { if (paren == 0) { *valid = false; return false; } paren--; } } /*The another one is legal expression, */ /*handed over to another function find_major() processing*/ *valid = true; return false; } } 简单讲讲上面的逻辑\n第一种情况为传入的表达式首尾已经被括号包围，这里用flag来进行判断\n①形如 (20) + (30) 表达式合法，但返回false\n②形如 (20 + 30) 表达式合法， 返回true\n③表达式非法\n第二种情况为传入的整个表达式并没有被括号包围，此时又有两种情况：\n①表达式非法，那么直接*valid = false即可\n②表达式合法，可继续求值，设置*valid = true; return false即可\n最后是找主运算符find_major()的实现\nint find_major(int p, int q) { int ret = -1; int paren = 0; //count parenthese int priority = 0; for (int i = p; i \u003c= q; i++) { if (tokens[i].type == TK_NUM) { continue; } else if (tokens[i].type == '(') { paren++; } else if (tokens[i].type == ')') { if (paren == 0) { return -1; } paren--; } else if (paren \u003e 0) { continue; } else { int temp_prio; switch (tokens[i].type) { case '*': case '/': temp_prio = 1; break; case '+': case '-': temp_prio = 2; break; default: assert(0); } if (temp_prio \u003e= priority) { priority = temp_prio; ret = i; } } } return ret; } 逻辑很简单，首先都是对表达式是否合法进行判断，唯一与check_paratheses()不同的一点是多了一个条件\nelse if (paren \u003e 0) { continue; } 即在括号内的运算符不是主运算符\n最后判断一下优先级大小，返回优先级最小的符号位置即可\n测试代码 /*Test my funtion expr()*/ FILE* file = fopen(\"/home/sino/PA/ics2024/nemu/tools/gen-expr/build/input\", \"r\"); if (!file) { assert(0); } char line[256]; while (fgets(line, sizeof(line), file)) { unsigned int expected_result; char expression[256]; bool valid; sscanf(line, \"%u %[^\\n]\", \u0026expected_result, expression); // Call expr function word_t result = expr(expression, \u0026valid); printf(\"the expr result is: %d\\n\", result); // Compare results if (valid == true) { if (result == expected_result) { printf(\"Success: %u = %s\\n\", result, expression); } else { printf(\"Mismatch: %u (calculated) != %u (expected) for expression: %s\\n\", result, expected_result, expression); } } else { printf(\"Invalid expression: %s\\n\", expression); } } 按照手册上的来做就行，没什么特别的\n选做题 负号的实现 给定一个新的token类型TK_NEG来标识负号，具体处理思路是在处理完token之后，且在进入表达式求值之前，将满足条件的token类型改为TK_NEG\nfor (int i = 0; i \u003c nr_token; i++) { if (i == 0 || (tokens[i - 1].type != ')' \u0026\u0026 tokens[i - 1].type != TK_NUM)) { if (tokens[i].type == '-') { tokens[i].type = TK_NEG; } } } 负号可以看作是一元运算符，与之前所编写的二元运算符不同，一元运算符只有一个操作数\n仿照二元运算操作，在找到主运算符之后，就需要将左右两个表达式与主运算符进行运算，那么一元运算符逻辑也应当如此\n所以应当在find_major()函数中做出区分，设定若找不到二元运算符则返回-1表明此为一元运算符\ndefault: temp_prio = -1; // no binary operator 之后给出单独的处理逻辑即可\nif (op \u003c 0) { // If no major operator, we need to check for unary operators if (tokens[p].type == TK_NEG) { // Handle unary negation word_t val = eval(p + 1, q, valid); return -val; } *valid = false; return 0; } PA 1-2结束\n",
-  "wordCount" : "827",
+  "articleBody": "本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。\n词法分析 首先，针对简单算术运算符增加几条正则规则\nstatic struct rule { const char *regex; int token_type; } rules[] = { /* TODO: Add more rules. * Pay attention to the precedence level of different rules. */ {\" +\", TK_NOTYPE}, // spaces {\"\\\\+\", '+'}, {\"==\", TK_EQ}, // equal {\"-\", '-'}, {\"\\\\*\", '*'}, {\"/\", '/'}, {\"\\\\(\", '('}, {\"\\\\)\", ')'}, {\"[0-9]+\", TK_NUM} // numbers }; 注意，由于+，*，(，)在正则表达式中属于元字符，有特殊含义，所以需要另一个元字符\\将其转义，但是由于在C语言中\\属于转义字符，为了在字符串中包含字面量\\，我们需要将其转义，即为\\\\\n接下来完成token的识别，为保持简洁，已省略大部分起始代码\nstatic bool make_token(char* e) { //... while (e[position] != '\\0') { for (i = 0; i \u003c NR_REGEX; i++) { if (regexec(\u0026re[i], e + position, 1, \u0026pmatch, 0) == 0 \u0026\u0026 pmatch.rm_so == 0) { //... if (rules[i].token_type == TK_NOTYPE) break; tokens[nr_token].type = rules[i].token_type; switch (rules[i].token_type) { case TK_NUM: strncpy(tokens[nr_token].str, substr_start, substr_len); tokens[nr_token].str[substr_len] = '\\0'; break; } nr_token++; break; } } //... } return true; } 通过阅读手册得知，regcomp()函数将提供的正则表达式转换为能够被regexec()识别的格式，而regexec()则开始对提供的字符串e进行匹配\n主要的逻辑是：只要不为空格类型TK_NOTYPE就认为识别成功，如果是数字类型TK_NUM就将数字记录到相应token的缓存区str即可\n递归求值 手册上提到’在求值过程中发现表达式不合法的时候, 应该给上层函数返回一个表示出错的标识’，此处使用valid标识表达式是否合法\nstatic word_t eval(int p, int q, bool* valid) { *valid = true; if (p \u003e q) { /* Bad expression */ *valid = false; return 0; } else if (p == q) { /* Single token. * For now this token should be a number. * Return the value of the number. */ if (tokens[p].type != TK_NUM) { *valid = false; return 0; } word_t ret = strtol(tokens[p].str, NULL, 10); return ret; } else if (check_parentheses(p, q, valid) == true) { /* The expression is surrounded by a matched pair of parentheses. * If that is the case, just throw away the parentheses. */ return eval(p + 1, q - 1, valid); } else if (*valid == true) { int op = find_major(p, q); if (op \u003c 0) { *valid = false; return 0; } word_t val0 = eval(p, op - 1, valid); word_t val1 = eval(op + 1, q, valid); switch (tokens[op].type) { case '+': return val0 + val1; case '-': return val0 - val1; case '*': return val0 * val1; case '/': return val0 / val1; default: assert(-1); } } return 0; } 函数的逻辑较为简单，要注意的是我们在p==q时使用了strtol()函数将缓存在str中的数字转换为长整型，其中的参数10即代表十进制\ncheck_paratheses()的实现\nstatic bool check_parentheses(int p, int q, bool* valid) { int paren = 0;//count paranthese if (tokens[p].type == '(' \u0026\u0026 tokens[q].type == ')') { bool flag = true; for (int i = p + 1; i \u003c q; i++) { if(tokens[i].type == ')' \u0026\u0026 (paren == 0) \u0026\u0026 flag) { flag = false; paren--; } if (tokens[i].type == '(') { paren++; } else if (tokens[i].type == ')') { if (paren == 0) { *valid = false; return false; //bad expression } paren--; } } return (paren == 0) \u0026\u0026 flag; } else { /*There are two situations, the one is bad expression, */ for (int i = p; i \u003c= q; i++) { if (tokens[i].type != '(' \u0026\u0026 tokens[i].type != ')') { continue; } else if (tokens[i].type == '(') { paren++; } else if (tokens[i].type == ')') { if (paren == 0) { *valid = false; return false; } paren--; } } /*The another one is legal expression, */ /*handed over to another function find_major() processing*/ *valid = true; return false; } } 简单讲讲上面的逻辑\n第一种情况为传入的表达式首尾已经被括号包围，这里用flag来进行判断\n①形如 (20) + (30) 表达式合法，但返回false\n②形如 (20 + 30) 表达式合法， 返回true\n③表达式非法\n第二种情况为传入的整个表达式并没有被括号包围，此时又有两种情况：\n①表达式非法，那么直接*valid = false即可\n②表达式合法，可继续求值，设置*valid = true; return false即可\n最后是找主运算符find_major()的实现\nstatic int find_major(int p, int q) { int ret = -1; int paren = 0; //count parenthese int priority = 0; for (int i = p; i \u003c= q; i++) { if (tokens[i].type == TK_NUM) { continue; } else if (tokens[i].type == '(') { paren++; } else if (tokens[i].type == ')') { if (paren == 0) { return -1; } paren--; } else if (paren \u003e 0) { continue; } else { int temp_prio; switch (tokens[i].type) { case '*': case '/': temp_prio = 1; break; case '+': case '-': temp_prio = 2; break; default: assert(0); } if (temp_prio \u003e= priority) { priority = temp_prio; ret = i; } } } return ret; } 逻辑很简单，首先都是对表达式是否合法进行判断，唯一与check_paratheses()不同的一点是多了一个条件\nelse if (paren \u003e 0) { continue; } 即在括号内的运算符不是主运算符\n最后判断一下优先级大小，返回优先级最小的符号位置即可\n测试代码 /*Test my funtion expr()*/ FILE* file = fopen(\"/home/sino/PA/ics2024/nemu/tools/gen-expr/build/input\", \"r\"); if (!file) { assert(0); } char line[256]; while (fgets(line, sizeof(line), file)) { unsigned int expected_result; char expression[256]; bool valid; sscanf(line, \"%u %[^\\n]\", \u0026expected_result, expression); // Call expr function word_t result = expr(expression, \u0026valid); printf(\"the expr result is: %d\\n\", result); // Compare results if (valid == true) { if (result == expected_result) { printf(\"Success: %u = %s\\n\", result, expression); } else { printf(\"Mismatch: %u (calculated) != %u (expected) for expression: %s\\n\", result, expected_result, expression); } } else { printf(\"Invalid expression: %s\\n\", expression); } } 按照手册上的来做就行，没什么特别的\n选做题 负号的实现 给定一个新的token类型TK_NEG来标识负号，具体思路是在处理完token之后，且在进入表达式求值之前，将满足条件的token类型改为TK_NEG\nfor (int i = 0; i \u003c nr_token; i++) { if (i == 0 || (tokens[i - 1].type != ')' \u0026\u0026 tokens[i - 1].type != TK_NUM)) { if (tokens[i].type == '-') { tokens[i].type = TK_NEG; } } } 负号可以看作是一元运算符，与之前所编写的二元运算符不同，一元运算符只有一个操作数\n仿照二元运算操作，在找到主运算符之后，就需要将左右两个表达式与主运算符进行运算，那么一元运算符逻辑也应当如此\n所以应当在find_major()函数中做出区分，设定若找不到二元运算符则返回-1，表明此为一元运算符\ndefault: temp_prio = -1; // no binary operator 之后给出单独的处理逻辑即可\nif (op \u003c 0) { // If no major operator, we need to check for unary operators if (tokens[p].type == TK_NEG) { word_t val = eval(p + 1, q, valid); return -val; } *valid = false; return 0; } PA 1-2结束\n",
+  "wordCount" : "826",
   "inLanguage": "en",
   "datePublished": "2024-11-04T21:12:07+08:00",
   "dateModified": "2024-11-04T21:12:07+08:00",
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "http://localhost:1313/posts/ics_pa_1-2/"
+    "@id": "https://Yang2KF.github.io/posts/ics_pa_1-2/"
   },
   "publisher": {
     "@type": "Organization",
     "name": "Yang2KF's blog",
     "logo": {
       "@type": "ImageObject",
-      "url": "http://localhost:1313/favicon.ico"
+      "url": "https://Yang2KF.github.io/favicon.ico"
     }
   }
 }
@@ -286,7 +286,7 @@ static bool make_token(char* e) {
 <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="http://localhost:1313/" accesskey="h" title="Yang2KF&#39;s blog (Alt + H)">Yang2KF&#39;s blog</a>
+            <a href="https://Yang2KF.github.io/" accesskey="h" title="Yang2KF&#39;s blog (Alt + H)">Yang2KF&#39;s blog</a>
             <div class="logo-switches">
                 <button id="theme-toggle" accesskey="t" title="(Alt + T)">
                     <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
@@ -312,27 +312,27 @@ static bool make_token(char* e) {
         </div>
         <ul id="menu">
             <li>
-                <a href="http://localhost:1313/" title="Home">
+                <a href="https://Yang2KF.github.io/" title="Home">
                     <span>Home</span>
                 </a>
             </li>
             <li>
-                <a href="http://localhost:1313/search/" title="Search (Alt &#43; /)" accesskey=/>
+                <a href="https://Yang2KF.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
                     <span>Search</span>
                 </a>
             </li>
             <li>
-                <a href="http://localhost:1313/categories/" title="Categories">
+                <a href="https://Yang2KF.github.io/categories/" title="Categories">
                     <span>Categories</span>
                 </a>
             </li>
             <li>
-                <a href="http://localhost:1313/archives/" title="Archives">
+                <a href="https://Yang2KF.github.io/archives/" title="Archives">
                     <span>Archives</span>
                 </a>
             </li>
             <li>
-                <a href="http://localhost:1313/tags/" title="Tags">
+                <a href="https://Yang2KF.github.io/tags/" title="Tags">
                     <span>Tags</span>
                 </a>
             </li>
@@ -343,15 +343,9 @@ static bool make_token(char* e) {
 
 <article class="post-single">
   <header class="post-header">
-    <div class="breadcrumbs"><a href="http://localhost:1313/">Home</a>&nbsp;»&nbsp;<a href="http://localhost:1313/posts/">Posts</a></div>
+    <div class="breadcrumbs"><a href="https://Yang2KF.github.io/">Home</a>&nbsp;»&nbsp;<a href="https://Yang2KF.github.io/posts/">Posts</a></div>
     <h1 class="post-title entry-hint-parent">
       ICS PA 1-2 表达式求值
-      <span class="entry-hint" title="Draft">
-        <svg xmlns="http://www.w3.org/2000/svg" height="35" viewBox="0 -960 960 960" fill="currentColor">
-          <path
-            d="M160-410v-60h300v60H160Zm0-165v-60h470v60H160Zm0-165v-60h470v60H160Zm360 580v-123l221-220q9-9 20-13t22-4q12 0 23 4.5t20 13.5l37 37q9 9 13 20t4 22q0 11-4.5 22.5T862.09-380L643-160H520Zm300-263-37-37 37 37ZM580-220h38l121-122-18-19-19-18-122 121v38Zm141-141-19-18 37 37-18-19Z" />
-        </svg>
-      </span>
     </h1>
     <div class="post-meta"><span title='2024-11-04 21:12:07 +0800 CST'>November 4, 2024</span>&nbsp;·&nbsp;4 min
 
@@ -439,7 +433,7 @@ static bool make_token(char* e) {
 <p>主要的逻辑是：只要不为空格类型<code>TK_NOTYPE</code>就认为识别成功，如果是数字类型<code>TK_NUM</code>就将数字记录到相应<code>token</code>的缓存区<code>str</code>即可</p>
 <h3 id="递归求值">递归求值<a hidden class="anchor" aria-hidden="true" href="#递归求值">#</a></h3>
 <p>手册上提到&rsquo;在求值过程中发现表达式不合法的时候, 应该给上层函数返回一个表示出错的标识&rsquo;，此处使用<code>valid</code>标识表达式是否合法</p>
-<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1">word_t</span> <span style="color:#88c0d0">eval</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">int</span> p<span style="color:#eceff4">,</span> <span style="color:#81a1c1">int</span> q<span style="color:#eceff4">,</span> <span style="color:#81a1c1">bool</span><span style="color:#81a1c1">*</span> valid<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">static</span> <span style="color:#81a1c1">word_t</span> <span style="color:#88c0d0">eval</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">int</span> p<span style="color:#eceff4">,</span> <span style="color:#81a1c1">int</span> q<span style="color:#eceff4">,</span> <span style="color:#81a1c1">bool</span><span style="color:#81a1c1">*</span> valid<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">*</span>valid <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">true</span><span style="color:#eceff4">;</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>p <span style="color:#81a1c1">&gt;</span> q<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
 </span></span><span style="display:flex;"><span>        <span style="color:#616e87;font-style:italic">/* Bad expression */</span>
@@ -484,9 +478,9 @@ static bool make_token(char* e) {
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span>
 </span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
-</span></span></code></pre></div><p>函数的逻辑较为简单，要注意的是我们在<code>p==q</code>是使用了<code>strtol()</code>函数将缓存在<code>str</code>中的数字转换为长整型，其中的参数<code>10</code>即代表十进制</p>
+</span></span></code></pre></div><p>函数的逻辑较为简单，要注意的是我们在<code>p==q</code>时使用了<code>strtol()</code>函数将缓存在<code>str</code>中的数字转换为长整型，其中的参数<code>10</code>即代表十进制</p>
 <p><code>check_paratheses()</code>的实现</p>
-<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1">bool</span> <span style="color:#88c0d0">check_parentheses</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">int</span> p<span style="color:#eceff4">,</span> <span style="color:#81a1c1">int</span> q<span style="color:#eceff4">,</span> <span style="color:#81a1c1">bool</span><span style="color:#81a1c1">*</span> valid<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">static</span> <span style="color:#81a1c1">bool</span> <span style="color:#88c0d0">check_parentheses</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">int</span> p<span style="color:#eceff4">,</span> <span style="color:#81a1c1">int</span> q<span style="color:#eceff4">,</span> <span style="color:#81a1c1">bool</span><span style="color:#81a1c1">*</span> valid<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">int</span> paren <span style="color:#81a1c1">=</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span><span style="color:#616e87;font-style:italic">//count paranthese
 </span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic"></span>    <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>p<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">==</span> <span style="color:#a3be8c">&#39;(&#39;</span> <span style="color:#81a1c1">&amp;&amp;</span> tokens<span style="color:#eceff4">[</span>q<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">==</span> <span style="color:#a3be8c">&#39;)&#39;</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
 </span></span><span style="display:flex;"><span>        <span style="color:#81a1c1">bool</span> flag <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">true</span><span style="color:#eceff4">;</span>
@@ -546,7 +540,7 @@ static bool make_token(char* e) {
 </li>
 </ul>
 <p>最后是找主运算符<code>find_major()</code>的实现</p>
-<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1">int</span> <span style="color:#88c0d0">find_major</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">int</span> p<span style="color:#eceff4">,</span> <span style="color:#81a1c1">int</span> q<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">static</span> <span style="color:#81a1c1">int</span> <span style="color:#88c0d0">find_major</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">int</span> p<span style="color:#eceff4">,</span> <span style="color:#81a1c1">int</span> q<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">int</span> ret <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">-</span><span style="color:#b48ead">1</span><span style="color:#eceff4">;</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">int</span> paren <span style="color:#81a1c1">=</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span> <span style="color:#616e87;font-style:italic">//count parenthese
 </span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic"></span>    <span style="color:#81a1c1">int</span> priority <span style="color:#81a1c1">=</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span>
@@ -629,7 +623,7 @@ static bool make_token(char* e) {
 </span></span></code></pre></div><p>按照手册上的来做就行，没什么特别的</p>
 <h2 id="选做题">选做题<a hidden class="anchor" aria-hidden="true" href="#选做题">#</a></h2>
 <h3 id="负号的实现">负号的实现<a hidden class="anchor" aria-hidden="true" href="#负号的实现">#</a></h3>
-<p>给定一个新的<code>token</code>类型<code>TK_NEG</code>来标识负号，具体处理思路是在处理完token之后，且在进入表达式求值之前，将满足条件的<code>token</code>类型改为<code>TK_NEG</code></p>
+<p>给定一个新的<code>token</code>类型<code>TK_NEG</code>来标识负号，具体思路是在处理完token之后，且在进入表达式求值之前，将满足条件的<code>token</code>类型改为<code>TK_NEG</code></p>
 <div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">for</span> <span style="color:#eceff4">(</span><span style="color:#81a1c1">int</span> i <span style="color:#81a1c1">=</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span> i <span style="color:#81a1c1">&lt;</span> nr_token<span style="color:#eceff4">;</span> i<span style="color:#81a1c1">++</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>i <span style="color:#81a1c1">==</span> <span style="color:#b48ead">0</span> <span style="color:#81a1c1">||</span> <span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>i <span style="color:#81a1c1">-</span> <span style="color:#b48ead">1</span><span style="color:#eceff4">].</span>type <span style="color:#81a1c1">!=</span> <span style="color:#a3be8c">&#39;)&#39;</span> <span style="color:#81a1c1">&amp;&amp;</span> tokens<span style="color:#eceff4">[</span>i <span style="color:#81a1c1">-</span> <span style="color:#b48ead">1</span><span style="color:#eceff4">].</span>type <span style="color:#81a1c1">!=</span> TK_NUM<span style="color:#eceff4">))</span> <span style="color:#eceff4">{</span>
 </span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>i<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">==</span> <span style="color:#a3be8c">&#39;-&#39;</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
@@ -639,14 +633,13 @@ static bool make_token(char* e) {
 </span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
 </span></span></code></pre></div><p>负号可以看作是一元运算符，与之前所编写的二元运算符不同，一元运算符只有一个操作数</p>
 <p>仿照二元运算操作，在找到主运算符之后，就需要将左右两个表达式与主运算符进行运算，那么一元运算符逻辑也应当如此</p>
-<p>所以应当在<code>find_major()</code>函数中做出区分，设定若找不到二元运算符则返回<code>-1</code>表明此为一元运算符</p>
+<p>所以应当在<code>find_major()</code>函数中做出区分，设定若找不到二元运算符则返回<code>-1</code>，表明此为一元运算符</p>
 <div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">default</span><span style="color:#81a1c1">:</span> temp_prio <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">-</span><span style="color:#b48ead">1</span><span style="color:#eceff4">;</span> <span style="color:#616e87;font-style:italic">// no binary operator
 </span></span></span></code></pre></div><p>之后给出单独的处理逻辑即可</p>
 <div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>op <span style="color:#81a1c1">&lt;</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#616e87;font-style:italic">// If no major operator, we need to check for unary operators
 </span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic"></span>    <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>tokens<span style="color:#eceff4">[</span>p<span style="color:#eceff4">].</span>type <span style="color:#81a1c1">==</span> TK_NEG<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#616e87;font-style:italic">// Handle unary negation
-</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic"></span>        <span style="color:#81a1c1">word_t</span> val <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">eval</span><span style="color:#eceff4">(</span>p <span style="color:#81a1c1">+</span> <span style="color:#b48ead">1</span><span style="color:#eceff4">,</span> q<span style="color:#eceff4">,</span> valid<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1">word_t</span> val <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">eval</span><span style="color:#eceff4">(</span>p <span style="color:#81a1c1">+</span> <span style="color:#b48ead">1</span><span style="color:#eceff4">,</span> q<span style="color:#eceff4">,</span> valid<span style="color:#eceff4">);</span>
 </span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#81a1c1">-</span>val<span style="color:#eceff4">;</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">*</span>valid <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">false</span><span style="color:#eceff4">;</span>
@@ -661,7 +654,12 @@ static bool make_token(char* e) {
     <ul class="post-tags">
     </ul>
 <nav class="paginav">
-  <a class="next" href="http://localhost:1313/posts/ics_pa_1-1/">
+  <a class="prev" href="https://Yang2KF.github.io/posts/ics_pa_1-3/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>ICS PA 1-3 监视点</span>
+  </a>
+  <a class="next" href="https://Yang2KF.github.io/posts/ics_pa_1-1/">
     <span class="title">Next »</span>
     <br>
     <span>ICS PA 1-1 基础设施</span>
@@ -673,7 +671,7 @@ static bool make_token(char* e) {
     </main>
     
 <footer class="footer">
-        <span>&copy; 2024 <a href="http://localhost:1313/">Yang2KF&#39;s blog</a></span> · 
+        <span>&copy; 2024 <a href="https://Yang2KF.github.io/">Yang2KF&#39;s blog</a></span> · 
 
     <span>
         Powered by

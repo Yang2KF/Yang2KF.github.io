@@ -45,10 +45,12 @@ static int cmd_info(char *args) {
 void isa_reg_display() {
     int length = sizeof(regs) / sizeof(regs[0]);
     for (int i = 0; i &lt; length; i&#43;&#43;) {
-        printf(&#34;%s     0x%x     %d\n&#34;, regs[i], cpu.gpr[i], cpu.gpr[i]);
+        printf(&#34;%-6s 0x%-12x %-10d\n&#34;, regs[i], gpr(i), gpr(i));
     }
 }
-变量cpu的类型为CPU_state，在 /nemu/include/memory/isa.h可找到">
+变量cpu的类型为CPU_state，在 /nemu/include/memory/isa.h可找到
+扫描内存
+在手册中RTFSC篇章已经提到，访问内存的实现在nemu/src/memory中">
 <meta name="author" content="">
 <link rel="canonical" href="https://Yang2KF.github.io/posts/ics_pa_1-1/">
 <link crossorigin="anonymous" href="/assets/css/stylesheet.778d247b40839112d8aa3a44faf102781aba3c65b190397f9249ba63c14a687f.css" integrity="sha256-d40ke0CDkRLYqjpE&#43;vECeBq6PGWxkDl/kkm6Y8FKaH8=" rel="preload stylesheet" as="style">
@@ -135,10 +137,12 @@ static int cmd_info(char *args) {
 void isa_reg_display() {
     int length = sizeof(regs) / sizeof(regs[0]);
     for (int i = 0; i &lt; length; i&#43;&#43;) {
-        printf(&#34;%s     0x%x     %d\n&#34;, regs[i], cpu.gpr[i], cpu.gpr[i]);
+        printf(&#34;%-6s 0x%-12x %-10d\n&#34;, regs[i], gpr(i), gpr(i));
     }
 }
-变量cpu的类型为CPU_state，在 /nemu/include/memory/isa.h可找到" />
+变量cpu的类型为CPU_state，在 /nemu/include/memory/isa.h可找到
+扫描内存
+在手册中RTFSC篇章已经提到，访问内存的实现在nemu/src/memory中" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://Yang2KF.github.io/posts/ics_pa_1-1/" /><meta property="article:section" content="posts" />
 <meta property="article:published_time" content="2024-11-01T22:33:12+08:00" />
@@ -184,10 +188,12 @@ static int cmd_info(char *args) {
 void isa_reg_display() {
     int length = sizeof(regs) / sizeof(regs[0]);
     for (int i = 0; i &lt; length; i&#43;&#43;) {
-        printf(&#34;%s     0x%x     %d\n&#34;, regs[i], cpu.gpr[i], cpu.gpr[i]);
+        printf(&#34;%-6s 0x%-12x %-10d\n&#34;, regs[i], gpr(i), gpr(i));
     }
 }
-变量cpu的类型为CPU_state，在 /nemu/include/memory/isa.h可找到"/>
+变量cpu的类型为CPU_state，在 /nemu/include/memory/isa.h可找到
+扫描内存
+在手册中RTFSC篇章已经提到，访问内存的实现在nemu/src/memory中"/>
 
 
 <script type="application/ld+json">
@@ -216,12 +222,12 @@ void isa_reg_display() {
   "@type": "BlogPosting",
   "headline": "ICS PA 1-1 基础设施",
   "name": "ICS PA 1-1 基础设施",
-  "description": "本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。\n单步执行 根据文档中提到的字符串处理函数即可，此处使用strtok(), sscanf() 进行处理\nstatic int cmd_si(char *args) { /*extract the first argument*/ char *arg = strtok(NULL, \u0026#34; \u0026#34;); /*the default is 1*/ if (arg == NULL) { cpu_exec(1); } else { int steps; /*convert to int*/ sscanf(arg, \u0026#34;%d\u0026#34;, \u0026amp;steps); cpu_exec(steps); } return 0; } strtok()的第一个参数为所处理的字符串str，第二个参数为处理的界限delimiting byte\n在sdb_mainloop()函数中，进行了第一次调用，指明了处理的字符串str\nchar *cmd = strtok(str, \u0026#34; \u0026#34;); 在后续的调用中，因为所处理的都是同一个字符串，第一个参数str则必须为NULL\nsscanf()则将char *类型的参数转换为int，便于函数cpu_exec()执行\n打印寄存器 仿照gdb格式同时打印十六进制和十进制的地址值，按照手册提示调用isa_reg_display()即可\nstatic int cmd_info(char *args) { char *arg = strtok(NULL, \u0026#34; \u0026#34;); if (arg == NULL) { printf(\u0026#34;No args.\\n\u0026#34;); } else if (strcmp(arg, \u0026#34;r\u0026#34;) == 0) { isa_reg_display(); } return 0; } 其中isa_reg_display()实现为\nvoid isa_reg_display() { int length = sizeof(regs) / sizeof(regs[0]); for (int i = 0; i \u0026lt; length; i++) { printf(\u0026#34;%s 0x%x %d\\n\u0026#34;, regs[i], cpu.gpr[i], cpu.gpr[i]); } } 变量cpu的类型为CPU_state，在 /nemu/include/memory/isa.h可找到\n",
+  "description": "本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。\n单步执行 根据文档中提到的字符串处理函数即可，此处使用strtok(), sscanf() 进行处理\nstatic int cmd_si(char *args) { /*extract the first argument*/ char *arg = strtok(NULL, \u0026#34; \u0026#34;); /*the default is 1*/ if (arg == NULL) { cpu_exec(1); } else { int steps; /*convert to int*/ sscanf(arg, \u0026#34;%d\u0026#34;, \u0026amp;steps); cpu_exec(steps); } return 0; } strtok()的第一个参数为所处理的字符串str，第二个参数为处理的界限delimiting byte\n在sdb_mainloop()函数中，进行了第一次调用，指明了处理的字符串str\nchar *cmd = strtok(str, \u0026#34; \u0026#34;); 在后续的调用中，因为所处理的都是同一个字符串，第一个参数str则必须为NULL\nsscanf()则将char *类型的参数转换为int，便于函数cpu_exec()执行\n打印寄存器 仿照gdb格式同时打印十六进制和十进制的地址值，按照手册提示调用isa_reg_display()即可\nstatic int cmd_info(char *args) { char *arg = strtok(NULL, \u0026#34; \u0026#34;); if (arg == NULL) { printf(\u0026#34;No args.\\n\u0026#34;); } else if (strcmp(arg, \u0026#34;r\u0026#34;) == 0) { isa_reg_display(); } return 0; } 其中isa_reg_display()实现为\nvoid isa_reg_display() { int length = sizeof(regs) / sizeof(regs[0]); for (int i = 0; i \u0026lt; length; i++) { printf(\u0026#34;%-6s 0x%-12x %-10d\\n\u0026#34;, regs[i], gpr(i), gpr(i)); } } 变量cpu的类型为CPU_state，在 /nemu/include/memory/isa.h可找到\n扫描内存 在手册中RTFSC篇章已经提到，访问内存的实现在nemu/src/memory中\n",
   "keywords": [
     
   ],
-  "articleBody": "本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。\n单步执行 根据文档中提到的字符串处理函数即可，此处使用strtok(), sscanf() 进行处理\nstatic int cmd_si(char *args) { /*extract the first argument*/ char *arg = strtok(NULL, \" \"); /*the default is 1*/ if (arg == NULL) { cpu_exec(1); } else { int steps; /*convert to int*/ sscanf(arg, \"%d\", \u0026steps); cpu_exec(steps); } return 0; } strtok()的第一个参数为所处理的字符串str，第二个参数为处理的界限delimiting byte\n在sdb_mainloop()函数中，进行了第一次调用，指明了处理的字符串str\nchar *cmd = strtok(str, \" \"); 在后续的调用中，因为所处理的都是同一个字符串，第一个参数str则必须为NULL\nsscanf()则将char *类型的参数转换为int，便于函数cpu_exec()执行\n打印寄存器 仿照gdb格式同时打印十六进制和十进制的地址值，按照手册提示调用isa_reg_display()即可\nstatic int cmd_info(char *args) { char *arg = strtok(NULL, \" \"); if (arg == NULL) { printf(\"No args.\\n\"); } else if (strcmp(arg, \"r\") == 0) { isa_reg_display(); } return 0; } 其中isa_reg_display()实现为\nvoid isa_reg_display() { int length = sizeof(regs) / sizeof(regs[0]); for (int i = 0; i \u003c length; i++) { printf(\"%s 0x%x %d\\n\", regs[i], cpu.gpr[i], cpu.gpr[i]); } } 变量cpu的类型为CPU_state，在 /nemu/include/memory/isa.h可找到\n扫描内存 在手册中RTFSC篇章已经提到，访问内存的实现在nemu/src/memory中\n同上，调用一下已有的实现即可，注意导入相应的头文件\nstatic int cmd_x(char *args) { /*extract the first and second argument*/ char *arg = strtok(NULL, \" \"); char *EXPR = strtok(NULL, \" \"); int i; if (arg == NULL || EXPR == NULL) { printf(\"No args.\\n\"); } else { int n; paddr_t expr; /*convert instructions*/ sscanf(arg, \"%d\", \u0026n); sscanf(EXPR, \"%x\", \u0026expr); for (i = 0; i \u003c n; i++) { printf(\"%#x:\\t%#x\\n\", expr, vaddr_read(expr, 4)); expr += 4; } } return 0; } 题目要求以十六进制形式输出连续的N个4字节，所以paddr_read()参数填4即可\n最后别忘记由于sdb是通过结构体数组cmd_table调用相应指令handler实现的，所以记得补全cmd_table并给出相应指令的help描述\nPA 1-1结束\n",
-  "wordCount" : "200",
+  "articleBody": "本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。\n单步执行 根据文档中提到的字符串处理函数即可，此处使用strtok(), sscanf() 进行处理\nstatic int cmd_si(char *args) { /*extract the first argument*/ char *arg = strtok(NULL, \" \"); /*the default is 1*/ if (arg == NULL) { cpu_exec(1); } else { int steps; /*convert to int*/ sscanf(arg, \"%d\", \u0026steps); cpu_exec(steps); } return 0; } strtok()的第一个参数为所处理的字符串str，第二个参数为处理的界限delimiting byte\n在sdb_mainloop()函数中，进行了第一次调用，指明了处理的字符串str\nchar *cmd = strtok(str, \" \"); 在后续的调用中，因为所处理的都是同一个字符串，第一个参数str则必须为NULL\nsscanf()则将char *类型的参数转换为int，便于函数cpu_exec()执行\n打印寄存器 仿照gdb格式同时打印十六进制和十进制的地址值，按照手册提示调用isa_reg_display()即可\nstatic int cmd_info(char *args) { char *arg = strtok(NULL, \" \"); if (arg == NULL) { printf(\"No args.\\n\"); } else if (strcmp(arg, \"r\") == 0) { isa_reg_display(); } return 0; } 其中isa_reg_display()实现为\nvoid isa_reg_display() { int length = sizeof(regs) / sizeof(regs[0]); for (int i = 0; i \u003c length; i++) { printf(\"%-6s 0x%-12x %-10d\\n\", regs[i], gpr(i), gpr(i)); } } 变量cpu的类型为CPU_state，在 /nemu/include/memory/isa.h可找到\n扫描内存 在手册中RTFSC篇章已经提到，访问内存的实现在nemu/src/memory中\n同上，调用一下已有的实现即可，注意导入相应的头文件\nstatic int cmd_x(char* args) { /*extract the first and second argument*/ char* arg = strtok(NULL, \" \"); char* EXPR = strtok(NULL, \" \"); int i; if (arg == NULL || EXPR == NULL) { printf(\"No args.\\n\"); } else { int n; bool valid = true; vaddr_t position = expr(EXPR, \u0026valid); if (valid == false) { printf(\"Your expression is illegal.\\n\"); return 0; } /*convert arguments*/ sscanf(arg, \"%d\", \u0026n); for (i = 0; i \u003c n; i++) { printf(\"%#x:\\t%#x\\n\", position, vaddr_read(position, 4)); position += 4; } } return 0; } 题目要求以十六进制形式输出连续的N个4字节，所以paddr_read()参数填4即可\n最后别忘记由于sdb是通过结构体数组cmd_table调用相应指令handler实现的，所以记得补全cmd_table并给出相应指令的help描述\nPA 1-1结束\n",
+  "wordCount" : "216",
   "inLanguage": "en",
   "datePublished": "2024-11-01T22:33:12+08:00",
   "dateModified": "2024-11-01T22:33:12+08:00",
@@ -317,7 +323,7 @@ void isa_reg_display() {
     <h1 class="post-title entry-hint-parent">
       ICS PA 1-1 基础设施
     </h1>
-    <div class="post-meta"><span title='2024-11-01 22:33:12 +0800 CST'>November 1, 2024</span>&nbsp;·&nbsp;1 min
+    <div class="post-meta"><span title='2024-11-01 22:33:12 +0800 CST'>November 1, 2024</span>&nbsp;·&nbsp;2 min
 
 </div>
   </header> <div class="toc">
@@ -377,30 +383,35 @@ void isa_reg_display() {
 <div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1">void</span> <span style="color:#88c0d0">isa_reg_display</span><span style="color:#eceff4">()</span> <span style="color:#eceff4">{</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">int</span> length <span style="color:#81a1c1">=</span> <span style="color:#81a1c1;font-weight:bold">sizeof</span><span style="color:#eceff4">(</span>regs<span style="color:#eceff4">)</span> <span style="color:#81a1c1">/</span> <span style="color:#81a1c1;font-weight:bold">sizeof</span><span style="color:#eceff4">(</span>regs<span style="color:#eceff4">[</span><span style="color:#b48ead">0</span><span style="color:#eceff4">]);</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">for</span> <span style="color:#eceff4">(</span><span style="color:#81a1c1">int</span> i <span style="color:#81a1c1">=</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span> i <span style="color:#81a1c1">&lt;</span> length<span style="color:#eceff4">;</span> i<span style="color:#81a1c1">++</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#88c0d0">printf</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;%s     0x%x     %d</span><span style="color:#ebcb8b">\n</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">,</span> regs<span style="color:#eceff4">[</span>i<span style="color:#eceff4">],</span> cpu<span style="color:#eceff4">.</span>gpr<span style="color:#eceff4">[</span>i<span style="color:#eceff4">],</span> cpu<span style="color:#eceff4">.</span>gpr<span style="color:#eceff4">[</span>i<span style="color:#eceff4">]);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#88c0d0">printf</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;%-6s 0x%-12x %-10d</span><span style="color:#ebcb8b">\n</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">,</span> regs<span style="color:#eceff4">[</span>i<span style="color:#eceff4">],</span> <span style="color:#88c0d0">gpr</span><span style="color:#eceff4">(</span>i<span style="color:#eceff4">),</span> <span style="color:#88c0d0">gpr</span><span style="color:#eceff4">(</span>i<span style="color:#eceff4">));</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
 </span></span><span style="display:flex;"><span><span style="color:#eceff4">}</span>
 </span></span></code></pre></div><p>变量<code>cpu</code>的类型为<code>CPU_state</code>，在 <code>/nemu/include/memory/isa.h</code>可找到</p>
 <h2 id="扫描内存">扫描内存<a hidden class="anchor" aria-hidden="true" href="#扫描内存">#</a></h2>
 <p>在手册中<strong>RTFSC</strong>篇章已经提到，访问内存的实现在<code>nemu/src/memory</code>中</p>
 <p>同上，调用一下已有的实现即可，注意导入相应的头文件</p>
-<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">static</span> <span style="color:#81a1c1">int</span> <span style="color:#88c0d0">cmd_x</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">char</span> <span style="color:#81a1c1">*</span>args<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">static</span> <span style="color:#81a1c1">int</span> <span style="color:#88c0d0">cmd_x</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">char</span><span style="color:#81a1c1">*</span> args<span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#616e87;font-style:italic">/*extract the first and second argument*/</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">char</span> <span style="color:#81a1c1">*</span>arg <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">strtok</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">NULL</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#34; &#34;</span><span style="color:#eceff4">);</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">char</span> <span style="color:#81a1c1">*</span>EXPR <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">strtok</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">NULL</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#34; &#34;</span><span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">char</span><span style="color:#81a1c1">*</span> arg <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">strtok</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">NULL</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#34; &#34;</span><span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">char</span><span style="color:#81a1c1">*</span> EXPR <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">strtok</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">NULL</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#34; &#34;</span><span style="color:#eceff4">);</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#81a1c1">int</span> i<span style="color:#eceff4">;</span>
 </span></span><span style="display:flex;"><span>
 </span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>arg <span style="color:#81a1c1">==</span> <span style="color:#81a1c1">NULL</span> <span style="color:#81a1c1">||</span> EXPR <span style="color:#81a1c1">==</span> <span style="color:#81a1c1">NULL</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
 </span></span><span style="display:flex;"><span>        <span style="color:#88c0d0">printf</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;No args.</span><span style="color:#ebcb8b">\n</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">);</span>
-</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span> <span style="color:#81a1c1;font-weight:bold">else</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">else</span> <span style="color:#eceff4">{</span>
 </span></span><span style="display:flex;"><span>        <span style="color:#81a1c1">int</span> n<span style="color:#eceff4">;</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1">paddr_t</span> expr<span style="color:#eceff4">;</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#616e87;font-style:italic">/*convert instructions*/</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1">bool</span> valid <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">true</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1">vaddr_t</span> position <span style="color:#81a1c1">=</span> <span style="color:#88c0d0">expr</span><span style="color:#eceff4">(</span>EXPR<span style="color:#eceff4">,</span> <span style="color:#81a1c1">&amp;</span>valid<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">if</span> <span style="color:#eceff4">(</span>valid <span style="color:#81a1c1">==</span> <span style="color:#81a1c1">false</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#88c0d0">printf</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;Your expression is illegal.</span><span style="color:#ebcb8b">\n</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#eceff4">}</span>
+</span></span><span style="display:flex;"><span>        <span style="color:#616e87;font-style:italic">/*convert arguments*/</span>
 </span></span><span style="display:flex;"><span>        <span style="color:#88c0d0">sscanf</span><span style="color:#eceff4">(</span>arg<span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#34;%d&#34;</span><span style="color:#eceff4">,</span> <span style="color:#81a1c1">&amp;</span>n<span style="color:#eceff4">);</span>
-</span></span><span style="display:flex;"><span>        <span style="color:#88c0d0">sscanf</span><span style="color:#eceff4">(</span>EXPR<span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#34;%x&#34;</span><span style="color:#eceff4">,</span> <span style="color:#81a1c1">&amp;</span>expr<span style="color:#eceff4">);</span>
 </span></span><span style="display:flex;"><span>        <span style="color:#81a1c1;font-weight:bold">for</span> <span style="color:#eceff4">(</span>i <span style="color:#81a1c1">=</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span> i <span style="color:#81a1c1">&lt;</span> n<span style="color:#eceff4">;</span> i<span style="color:#81a1c1">++</span><span style="color:#eceff4">)</span> <span style="color:#eceff4">{</span>
-</span></span><span style="display:flex;"><span>            <span style="color:#88c0d0">printf</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;%#x:</span><span style="color:#ebcb8b">\t</span><span style="color:#a3be8c">%#x</span><span style="color:#ebcb8b">\n</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">,</span> expr<span style="color:#eceff4">,</span> <span style="color:#88c0d0">vaddr_read</span><span style="color:#eceff4">(</span>expr<span style="color:#eceff4">,</span> <span style="color:#b48ead">4</span><span style="color:#eceff4">));</span>  
-</span></span><span style="display:flex;"><span>            expr <span style="color:#81a1c1">+=</span> <span style="color:#b48ead">4</span><span style="color:#eceff4">;</span>
+</span></span><span style="display:flex;"><span>            <span style="color:#88c0d0">printf</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;%#x:</span><span style="color:#ebcb8b">\t</span><span style="color:#a3be8c">%#x</span><span style="color:#ebcb8b">\n</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">,</span> position<span style="color:#eceff4">,</span> <span style="color:#88c0d0">vaddr_read</span><span style="color:#eceff4">(</span>position<span style="color:#eceff4">,</span> <span style="color:#b48ead">4</span><span style="color:#eceff4">));</span>
+</span></span><span style="display:flex;"><span>            position <span style="color:#81a1c1">+=</span> <span style="color:#b48ead">4</span><span style="color:#eceff4">;</span>
 </span></span><span style="display:flex;"><span>        <span style="color:#eceff4">}</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#eceff4">}</span>
 </span></span><span style="display:flex;"><span>    <span style="color:#81a1c1;font-weight:bold">return</span> <span style="color:#b48ead">0</span><span style="color:#eceff4">;</span>
@@ -416,6 +427,11 @@ void isa_reg_display() {
     <ul class="post-tags">
     </ul>
 <nav class="paginav">
+  <a class="prev" href="https://Yang2KF.github.io/posts/ics_pa_1-2/">
+    <span class="title">« Prev</span>
+    <br>
+    <span>ICS PA 1-2 表达式求值</span>
+  </a>
   <a class="next" href="https://Yang2KF.github.io/posts/hugo-githubpages/">
     <span class="title">Next »</span>
     <br>
