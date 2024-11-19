@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>ICS PA 2-1 RTFSC(2) | Yang2KF&#39;s blog</title>
+<meta name="keywords" content="">
+<meta name="description" content="本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。
+指令执行过程
+execute()模拟了cpu的运行过程
+
+
+传入decode和此时的pc，由于不同isa执行过程可能不同，所以单独抽象出一个函数isa_exec_once()以屏蔽isa之间的差异
+
+
+取出的指令存入结构体s
+
+
+进入取指阶段
+此时操作的是snpc，直接将映射在虚拟地址中的指令取出，并将snpc指向下一条指令的内存地址
+由于riscv32为定长指令，所以长度固定位4字节
+
+
+映射的虚拟地址实际还是会访问真实的物理地址
+
+
+之后就将取出的指令返回，取出的指令将会存储在Decode结构体中。
+
+
+进入译码阶段，将s传入
+
+
+
+
+将snpc赋值给dnpc，如果后续没有跳转指令，则snpc与dnpc相等，否则需要修改dnpc
+之后开始进行模式匹配，可使用宏展开清晰看出执行过程
+利用makefile进行宏展开
+preprocess: $(SRCS)
+	@echo &#34;Running preprocessor for source files...&#34;
+	@mkdir -p $(BUILD_DIR)/preprocessed
+	@for src in $^; do \
+	    echo &#34;&#43; Preprocessing $$src&#34;; \
+	    $(CC) $(CFLAGS) -E $$src -o $(BUILD_DIR)/preprocessed/$$(basename $$src).i; \
+	    echo &#34;Preprocessed output saved to $(BUILD_DIR)/preprocessed/$$(basename $$src).i&#34;; \
+	done
+Makefile 中的换行符会终止当前命令，因此必须用 \ 进行换行转义。
+补全指令
+宏解析
+先来看比较重要的几个宏
+#define BITMASK(bits) ((1ull &lt;&lt; (bits)) - 1)
+#define BITS(x, hi, lo) (((x) &gt;&gt; (lo)) &amp; BITMASK((hi) - (lo) &#43; 1)) // similar to x[hi:lo] in verilog
+#define SEXT(x, len) ({ struct { int64_t n : len; } __x = { .n = x }; (uint64_t)__x.n; })
+BITMASK将数值为1的无符号长整形左移bits位再减1，即可生成一个bits&#43;1位为0，其余全为1的掩码">
+<meta name="author" content="">
+<link rel="canonical" href="https://Yang2KF.github.io/posts/ics_pa_2-1/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.778d247b40839112d8aa3a44faf102781aba3c65b190397f9249ba63c14a687f.css" integrity="sha256-d40ke0CDkRLYqjpE&#43;vECeBq6PGWxkDl/kkm6Y8FKaH8=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://Yang2KF.github.io/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://Yang2KF.github.io/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://Yang2KF.github.io/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://Yang2KF.github.io/apple-touch-icon.png">
+<link rel="mask-icon" href="https://Yang2KF.github.io/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://Yang2KF.github.io/posts/ics_pa_2-1/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript><meta property="og:title" content="ICS PA 2-1 RTFSC(2)" />
+<meta property="og:description" content="本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。
+指令执行过程
+execute()模拟了cpu的运行过程
+
+
+传入decode和此时的pc，由于不同isa执行过程可能不同，所以单独抽象出一个函数isa_exec_once()以屏蔽isa之间的差异
+
+
+取出的指令存入结构体s
+
+
+进入取指阶段
+此时操作的是snpc，直接将映射在虚拟地址中的指令取出，并将snpc指向下一条指令的内存地址
+由于riscv32为定长指令，所以长度固定位4字节
+
+
+映射的虚拟地址实际还是会访问真实的物理地址
+
+
+之后就将取出的指令返回，取出的指令将会存储在Decode结构体中。
+
+
+进入译码阶段，将s传入
+
+
+
+
+将snpc赋值给dnpc，如果后续没有跳转指令，则snpc与dnpc相等，否则需要修改dnpc
+之后开始进行模式匹配，可使用宏展开清晰看出执行过程
+利用makefile进行宏展开
+preprocess: $(SRCS)
+	@echo &#34;Running preprocessor for source files...&#34;
+	@mkdir -p $(BUILD_DIR)/preprocessed
+	@for src in $^; do \
+	    echo &#34;&#43; Preprocessing $$src&#34;; \
+	    $(CC) $(CFLAGS) -E $$src -o $(BUILD_DIR)/preprocessed/$$(basename $$src).i; \
+	    echo &#34;Preprocessed output saved to $(BUILD_DIR)/preprocessed/$$(basename $$src).i&#34;; \
+	done
+Makefile 中的换行符会终止当前命令，因此必须用 \ 进行换行转义。
+补全指令
+宏解析
+先来看比较重要的几个宏
+#define BITMASK(bits) ((1ull &lt;&lt; (bits)) - 1)
+#define BITS(x, hi, lo) (((x) &gt;&gt; (lo)) &amp; BITMASK((hi) - (lo) &#43; 1)) // similar to x[hi:lo] in verilog
+#define SEXT(x, len) ({ struct { int64_t n : len; } __x = { .n = x }; (uint64_t)__x.n; })
+BITMASK将数值为1的无符号长整形左移bits位再减1，即可生成一个bits&#43;1位为0，其余全为1的掩码" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://Yang2KF.github.io/posts/ics_pa_2-1/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2024-11-19T12:15:38+08:00" />
+<meta property="article:modified_time" content="2024-11-19T12:15:38+08:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="ICS PA 2-1 RTFSC(2)"/>
+<meta name="twitter:description" content="本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。
+指令执行过程
+execute()模拟了cpu的运行过程
+
+
+传入decode和此时的pc，由于不同isa执行过程可能不同，所以单独抽象出一个函数isa_exec_once()以屏蔽isa之间的差异
+
+
+取出的指令存入结构体s
+
+
+进入取指阶段
+此时操作的是snpc，直接将映射在虚拟地址中的指令取出，并将snpc指向下一条指令的内存地址
+由于riscv32为定长指令，所以长度固定位4字节
+
+
+映射的虚拟地址实际还是会访问真实的物理地址
+
+
+之后就将取出的指令返回，取出的指令将会存储在Decode结构体中。
+
+
+进入译码阶段，将s传入
+
+
+
+
+将snpc赋值给dnpc，如果后续没有跳转指令，则snpc与dnpc相等，否则需要修改dnpc
+之后开始进行模式匹配，可使用宏展开清晰看出执行过程
+利用makefile进行宏展开
+preprocess: $(SRCS)
+	@echo &#34;Running preprocessor for source files...&#34;
+	@mkdir -p $(BUILD_DIR)/preprocessed
+	@for src in $^; do \
+	    echo &#34;&#43; Preprocessing $$src&#34;; \
+	    $(CC) $(CFLAGS) -E $$src -o $(BUILD_DIR)/preprocessed/$$(basename $$src).i; \
+	    echo &#34;Preprocessed output saved to $(BUILD_DIR)/preprocessed/$$(basename $$src).i&#34;; \
+	done
+Makefile 中的换行符会终止当前命令，因此必须用 \ 进行换行转义。
+补全指令
+宏解析
+先来看比较重要的几个宏
+#define BITMASK(bits) ((1ull &lt;&lt; (bits)) - 1)
+#define BITS(x, hi, lo) (((x) &gt;&gt; (lo)) &amp; BITMASK((hi) - (lo) &#43; 1)) // similar to x[hi:lo] in verilog
+#define SEXT(x, len) ({ struct { int64_t n : len; } __x = { .n = x }; (uint64_t)__x.n; })
+BITMASK将数值为1的无符号长整形左移bits位再减1，即可生成一个bits&#43;1位为0，其余全为1的掩码"/>
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://Yang2KF.github.io/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "ICS PA 2-1 RTFSC(2)",
+      "item": "https://Yang2KF.github.io/posts/ics_pa_2-1/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "ICS PA 2-1 RTFSC(2)",
+  "name": "ICS PA 2-1 RTFSC(2)",
+  "description": "本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。\n指令执行过程 execute()模拟了cpu的运行过程\n传入decode和此时的pc，由于不同isa执行过程可能不同，所以单独抽象出一个函数isa_exec_once()以屏蔽isa之间的差异\n取出的指令存入结构体s\n进入取指阶段\n此时操作的是snpc，直接将映射在虚拟地址中的指令取出，并将snpc指向下一条指令的内存地址\n由于riscv32为定长指令，所以长度固定位4字节\n映射的虚拟地址实际还是会访问真实的物理地址\n之后就将取出的指令返回，取出的指令将会存储在Decode结构体中。\n进入译码阶段，将s传入\n将snpc赋值给dnpc，如果后续没有跳转指令，则snpc与dnpc相等，否则需要修改dnpc\n之后开始进行模式匹配，可使用宏展开清晰看出执行过程\n利用makefile进行宏展开 preprocess: $(SRCS) @echo \u0026#34;Running preprocessor for source files...\u0026#34; @mkdir -p $(BUILD_DIR)/preprocessed @for src in $^; do \\ echo \u0026#34;+ Preprocessing $$src\u0026#34;; \\ $(CC) $(CFLAGS) -E $$src -o $(BUILD_DIR)/preprocessed/$$(basename $$src).i; \\ echo \u0026#34;Preprocessed output saved to $(BUILD_DIR)/preprocessed/$$(basename $$src).i\u0026#34;; \\ done Makefile 中的换行符会终止当前命令，因此必须用 \\ 进行换行转义。\n补全指令 宏解析 先来看比较重要的几个宏\n#define BITMASK(bits) ((1ull \u0026lt;\u0026lt; (bits)) - 1) #define BITS(x, hi, lo) (((x) \u0026gt;\u0026gt; (lo)) \u0026amp; BITMASK((hi) - (lo) + 1)) // similar to x[hi:lo] in verilog #define SEXT(x, len) ({ struct { int64_t n : len; } __x = { .n = x }; (uint64_t)__x.n; }) BITMASK将数值为1的无符号长整形左移bits位再减1，即可生成一个bits+1位为0，其余全为1的掩码\n",
+  "keywords": [
+    
+  ],
+  "articleBody": "本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。\n指令执行过程 execute()模拟了cpu的运行过程\n传入decode和此时的pc，由于不同isa执行过程可能不同，所以单独抽象出一个函数isa_exec_once()以屏蔽isa之间的差异\n取出的指令存入结构体s\n进入取指阶段\n此时操作的是snpc，直接将映射在虚拟地址中的指令取出，并将snpc指向下一条指令的内存地址\n由于riscv32为定长指令，所以长度固定位4字节\n映射的虚拟地址实际还是会访问真实的物理地址\n之后就将取出的指令返回，取出的指令将会存储在Decode结构体中。\n进入译码阶段，将s传入\n将snpc赋值给dnpc，如果后续没有跳转指令，则snpc与dnpc相等，否则需要修改dnpc\n之后开始进行模式匹配，可使用宏展开清晰看出执行过程\n利用makefile进行宏展开 preprocess: $(SRCS) @echo \"Running preprocessor for source files...\" @mkdir -p $(BUILD_DIR)/preprocessed @for src in $^; do \\ echo \"+ Preprocessing $$src\"; \\ $(CC) $(CFLAGS) -E $$src -o $(BUILD_DIR)/preprocessed/$$(basename $$src).i; \\ echo \"Preprocessed output saved to $(BUILD_DIR)/preprocessed/$$(basename $$src).i\"; \\ done Makefile 中的换行符会终止当前命令，因此必须用 \\ 进行换行转义。\n补全指令 宏解析 先来看比较重要的几个宏\n#define BITMASK(bits) ((1ull \u003c\u003c (bits)) - 1) #define BITS(x, hi, lo) (((x) \u003e\u003e (lo)) \u0026 BITMASK((hi) - (lo) + 1)) // similar to x[hi:lo] in verilog #define SEXT(x, len) ({ struct { int64_t n : len; } __x = { .n = x }; (uint64_t)__x.n; }) BITMASK将数值为1的无符号长整形左移bits位再减1，即可生成一个bits+1位为0，其余全为1的掩码\nBITS将数x右移lo位，再与生成的掩码进行与运算\n比如0b11001提取x[3:1]即为0b100\n运算过程BITS(0b11001, 3, 1) =\u003e (0b11001 \u003e\u003e 1 \u0026 BITMASK(3)) =\u003e (0b01100 \u0026 0b0111) =\u003e 0b100\nSEXT中使用了GCC块表达式({...})会将最后一条语句作为该表达式的值，其主要的作用为将数x进行符号扩展，使得能够处理操作数或立即数为有符号数的情况\n实现指令 参考资料\nRISC-V Reference\nRISC-V Manual-en\nRISC-V Manual-ch\n以第一个dummy.c程序为例，阅读汇编代码发现有这几个指令是代码中没有实现的，li addi jal ret sw mv\n查阅资料得知，li是伪指令，对于 12 位以内的立即数，li 会被转换为 addi（加法立即数）指令，而对于更大的立即数，汇编器会使用多个指令来加载这个立即数，通常会使用 lui和 addi 的组合，所以只需要实现addi和lui即可\nINSTPAT(\"??????? ????? ????? 000 ????? 00100 11\", addi , I, R(rd) = src1 + imm); INSTPAT(\"??????? ????? ????? ??? ????? 01101 11\", lui , U, R(rd) = imm); jal为跳转指令，需要使用到dnpc。在进行译码之前，snpc 和dnpc相同都指向了下一条指令的内存地址，所以根据jal的指令描述rd = PC+4; PC += imm即可写出该指令匹配模式\nINSTPAT(\"??????? ????? ????? ??? ????? 11011 11\", jal , J, R(rd) = s-\u003esnpc; s-\u003ednpc = s-\u003epc + imm); 同时根据J型指令的格式，可以写出J型指令的立即数表示\n#define immJ() do { \\ *imm = (SEXT(BITS(i, 31, 31), 1) \u003c\u003c 20) | \\ (BITS(i, 30, 21) \u003c\u003c 1) | \\ (BITS(i, 20, 20) \u003c\u003c 11) | \\ (BITS(i, 19, 12) \u003c\u003c 12); \\ } while(0) ret 是对指令 jalr x0, ra, 0 的一种伪指令表示，所以需要实现jalr\nINSTPAT(\"??????? ????? ????? 000 ????? 11001 11\", jalr , I, R(rd) = s-\u003esnpc; s-\u003ednpc = src1 + imm); sw是存储字指令，将寄存器 rs2 中的字（4字节）存储到地址 rs1 + imm。M[rs1+imm][0:31] = rs2[0:31]\nINSTPAT(\"??????? ????? ????? 010 ????? 01000 11\", sw , S, Mw(src1 + imm, 4, src2)); mv也是一个伪指令，mv rd, rs 的作用是：将寄存器 rs 的值复制到寄存器 rd 中，等效于addi rd, rs, 0\n补全上述指令后即可通过dummy.c测试\n其他测试大同小异，可自行实现\nPA 2-1 结束\n",
+  "wordCount" : "302",
+  "inLanguage": "en",
+  "datePublished": "2024-11-19T12:15:38+08:00",
+  "dateModified": "2024-11-19T12:15:38+08:00",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://Yang2KF.github.io/posts/ics_pa_2-1/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Yang2KF's blog",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://Yang2KF.github.io/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://Yang2KF.github.io/" accesskey="h" title="Yang2KF&#39;s blog (Alt + H)">Yang2KF&#39;s blog</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://Yang2KF.github.io/" title="Home">
+                    <span>Home</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://Yang2KF.github.io/search/" title="Search (Alt &#43; /)" accesskey=/>
+                    <span>Search</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://Yang2KF.github.io/categories/" title="Categories">
+                    <span>Categories</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://Yang2KF.github.io/archives/" title="Archives">
+                    <span>Archives</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://Yang2KF.github.io/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    <div class="breadcrumbs"><a href="https://Yang2KF.github.io/">Home</a>&nbsp;»&nbsp;<a href="https://Yang2KF.github.io/posts/">Posts</a></div>
+    <h1 class="post-title entry-hint-parent">
+      ICS PA 2-1 RTFSC(2)
+    </h1>
+    <div class="post-meta"><span title='2024-11-19 12:15:38 +0800 CST'>November 19, 2024</span>&nbsp;·&nbsp;2 min
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><ul>
+                <li>
+                    <a href="#%e6%8c%87%e4%bb%a4%e6%89%a7%e8%a1%8c%e8%bf%87%e7%a8%8b" aria-label="指令执行过程">指令执行过程</a></li>
+                <li>
+                    <a href="#%e5%88%a9%e7%94%a8makefile%e8%bf%9b%e8%a1%8c%e5%ae%8f%e5%b1%95%e5%bc%80" aria-label="利用makefile进行宏展开">利用makefile进行宏展开</a></li>
+                <li>
+                    <a href="#%e8%a1%a5%e5%85%a8%e6%8c%87%e4%bb%a4" aria-label="补全指令">补全指令</a><ul>
+                        
+                <li>
+                    <a href="#%e5%ae%8f%e8%a7%a3%e6%9e%90" aria-label="宏解析">宏解析</a></li>
+                <li>
+                    <a href="#%e5%ae%9e%e7%8e%b0%e6%8c%87%e4%bb%a4" aria-label="实现指令">实现指令</a>
+                </li>
+            </ul>
+            </li>
+            </ul>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。</p>
+<h2 id="指令执行过程">指令执行过程<a hidden class="anchor" aria-hidden="true" href="#指令执行过程">#</a></h2>
+<p><code>execute()</code>模拟了cpu的运行过程</p>
+<p><img loading="lazy" src="images/1.png" alt="image-1"  />
+</p>
+<p>传入<code>decode</code>和此时的<code>pc</code>，由于不同<code>isa</code>执行过程可能不同，所以单独抽象出一个函数<code>isa_exec_once()</code>以屏蔽isa之间的差异</p>
+<p><img loading="lazy" src="images/2.png" alt="image-2"  />
+</p>
+<p>取出的指令存入结构体<code>s</code></p>
+<p><img loading="lazy" src="images/3.png" alt="image-3"  />
+</p>
+<p>进入取指阶段</p>
+<p>此时操作的是<code>snpc</code>，直接将映射在虚拟地址中的指令取出，并将<code>snpc</code>指向下一条指令的内存地址</p>
+<p>由于<strong>riscv32</strong>为定长指令，所以长度固定位4字节</p>
+<p><img loading="lazy" src="images/4.png" alt="image-4"  />
+</p>
+<p>映射的虚拟地址实际还是会访问真实的物理地址</p>
+<p><img loading="lazy" src="images/5.png" alt="image-5"  />
+</p>
+<p>之后就将取出的指令返回，取出的指令将会存储在<code>Decode</code>结构体中。</p>
+<p><img loading="lazy" src="images/6.png" alt="image-6"  />
+</p>
+<p>进入译码阶段，将<code>s</code>传入</p>
+<p><img loading="lazy" src="images/7.png" alt="image-7"  />
+</p>
+<p><img loading="lazy" src="images/8.png" alt="image-8"  />
+</p>
+<p>将<code>snpc</code>赋值给<code>dnpc</code>，如果后续没有跳转指令，则<code>snp</code>c与<code>dnpc</code>相等，否则需要修改<code>dnpc</code></p>
+<p>之后开始进行模式匹配，可使用宏展开清晰看出执行过程</p>
+<h2 id="利用makefile进行宏展开">利用makefile进行宏展开<a hidden class="anchor" aria-hidden="true" href="#利用makefile进行宏展开">#</a></h2>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-makefile" data-lang="makefile"><span style="display:flex;"><span><span style="color:#88c0d0">preprocess</span><span style="color:#81a1c1">:</span> <span style="color:#81a1c1;font-weight:bold">$(</span>SRCS<span style="color:#81a1c1;font-weight:bold">)</span>
+</span></span><span style="display:flex;"><span>	@echo <span style="color:#a3be8c">&#34;Running preprocessor for source files...&#34;</span>
+</span></span><span style="display:flex;"><span>	@mkdir -p <span style="color:#81a1c1;font-weight:bold">$(</span>BUILD_DIR<span style="color:#81a1c1;font-weight:bold">)</span>/preprocessed
+</span></span><span style="display:flex;"><span>	@for src in $^<span style="color:#eceff4">;</span> <span style="color:#81a1c1;font-weight:bold">do</span> <span style="color:#ebcb8b">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ebcb8b"></span>	    <span style="color:#81a1c1">echo</span> <span style="color:#a3be8c">&#34;+ Preprocessing </span>$$<span style="color:#a3be8c">src&#34;</span><span style="color:#eceff4">;</span> <span style="color:#ebcb8b">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ebcb8b"></span>	    <span style="color:#81a1c1;font-weight:bold">$(</span>CC<span style="color:#81a1c1;font-weight:bold">)</span> <span style="color:#81a1c1;font-weight:bold">$(</span>CFLAGS<span style="color:#81a1c1;font-weight:bold">)</span> -E $$src -o <span style="color:#81a1c1;font-weight:bold">$(</span>BUILD_DIR<span style="color:#81a1c1;font-weight:bold">)</span>/preprocessed/$$<span style="color:#81a1c1">(</span>basename $$src<span style="color:#81a1c1">)</span>.i<span style="color:#eceff4">;</span> <span style="color:#ebcb8b">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ebcb8b"></span>	    <span style="color:#81a1c1">echo</span> <span style="color:#a3be8c">&#34;Preprocessed output saved to </span><span style="color:#81a1c1;font-weight:bold">$(</span>BUILD_DIR<span style="color:#81a1c1;font-weight:bold">)</span><span style="color:#a3be8c">/preprocessed/</span>$$<span style="color:#a3be8c">(basename </span>$$<span style="color:#a3be8c">src).i&#34;</span><span style="color:#eceff4">;</span> <span style="color:#ebcb8b">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ebcb8b"></span>	<span style="color:#81a1c1;font-weight:bold">done</span>
+</span></span></code></pre></div><p>Makefile 中的换行符会终止当前命令，因此必须用 <code>\</code> 进行换行转义。</p>
+<h2 id="补全指令">补全指令<a hidden class="anchor" aria-hidden="true" href="#补全指令">#</a></h2>
+<h3 id="宏解析">宏解析<a hidden class="anchor" aria-hidden="true" href="#宏解析">#</a></h3>
+<p>先来看比较重要的几个宏</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#5e81ac;font-style:italic">#define BITMASK(bits) ((1ull &lt;&lt; (bits)) - 1)
+</span></span></span><span style="display:flex;"><span><span style="color:#5e81ac;font-style:italic">#define BITS(x, hi, lo) (((x) &gt;&gt; (lo)) &amp; BITMASK((hi) - (lo) + 1)) </span><span style="color:#616e87;font-style:italic">// similar to x[hi:lo] in verilog
+</span></span></span><span style="display:flex;"><span><span style="color:#616e87;font-style:italic"></span><span style="color:#5e81ac;font-style:italic">#define SEXT(x, len) ({ struct { int64_t n : len; } __x = { .n = x }; (uint64_t)__x.n; })
+</span></span></span></code></pre></div><p><code>BITMASK</code>将数值为1的无符号长整形左移<code>bits</code>位再减1，即可生成一个<code>bits+1</code>位为0，其余全为1的掩码</p>
+<p><code>BITS</code>将数<code>x</code>右移<code>lo</code>位，再与生成的掩码进行与运算</p>
+<p>比如<code>0b11001</code>提取x[3:1]即为<code>0b100</code></p>
+<p>运算过程<code>BITS(0b11001, 3, 1) =&gt; (0b11001 &gt;&gt; 1 &amp; BITMASK(3)) =&gt; (0b01100 &amp; 0b0111) =&gt; 0b100</code></p>
+<p><code>SEXT</code>中使用了GCC块表达式<code>({...})</code>会将最后一条语句作为该表达式的值，其主要的作用为将数<code>x</code>进行符号扩展，使得能够处理操作数或立即数为有符号数的情况</p>
+<h3 id="实现指令">实现指令<a hidden class="anchor" aria-hidden="true" href="#实现指令">#</a></h3>
+<p>参考资料</p>
+<p><a href="https://www.cs.sfu.ca/~ashriram/Courses/CS295/assets/notebooks/RISCV/RISCV_CARD.pdf" target="_blank" rel="noopener" style="color:#0366D6";>RISC-V Reference</a></p>
+<p><a href="https://riscv.org/technical/specifications/" target="_blank" rel="noopener" style="color:#0366D6";>RISC-V Manual-en</a></p>
+<p><a href="https://github.com/ISRC-CAS/riscv-isa-manual-cn" target="_blank" rel="noopener" style="color:#0366D6";>RISC-V Manual-ch</a></p>
+<p>以第一个<code>dummy.c</code>程序为例，阅读汇编代码发现有这几个指令是代码中没有实现的，<code>li addi jal ret sw mv</code></p>
+<p>查阅资料得知，<code>li</code>是伪指令，对于 12 位以内的立即数，<code>li</code> 会被转换为 <code>addi</code>（加法立即数）指令，而对于更大的立即数，汇编器会使用多个指令来加载这个立即数，通常会使用 <code>lui</code>和 <code>addi</code> 的组合，所以只需要实现<code>addi</code>和<code>lui</code>即可</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#88c0d0">INSTPAT</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;??????? ????? ????? 000 ????? 00100 11&#34;</span><span style="color:#eceff4">,</span> addi   <span style="color:#eceff4">,</span> I<span style="color:#eceff4">,</span> <span style="color:#88c0d0">R</span><span style="color:#eceff4">(</span>rd<span style="color:#eceff4">)</span> <span style="color:#81a1c1">=</span> src1 <span style="color:#81a1c1">+</span> imm<span style="color:#eceff4">);</span>
+</span></span><span style="display:flex;"><span><span style="color:#88c0d0">INSTPAT</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;??????? ????? ????? ??? ????? 01101 11&#34;</span><span style="color:#eceff4">,</span> lui    <span style="color:#eceff4">,</span> U<span style="color:#eceff4">,</span> <span style="color:#88c0d0">R</span><span style="color:#eceff4">(</span>rd<span style="color:#eceff4">)</span> <span style="color:#81a1c1">=</span> imm<span style="color:#eceff4">);</span>
+</span></span></code></pre></div><p><code>jal</code>为跳转指令，需要使用到<code>dnpc</code>。在进行译码之前，<code>snpc </code> 和<code>dnpc</code>相同都指向了下一条指令的内存地址，所以根据<code>jal</code>的指令描述<code>rd = PC+4; PC += imm</code>即可写出该指令匹配模式</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#88c0d0">INSTPAT</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;??????? ????? ????? ??? ????? 11011 11&#34;</span><span style="color:#eceff4">,</span> jal    <span style="color:#eceff4">,</span> J<span style="color:#eceff4">,</span> <span style="color:#88c0d0">R</span><span style="color:#eceff4">(</span>rd<span style="color:#eceff4">)</span> <span style="color:#81a1c1">=</span> s<span style="color:#81a1c1">-&gt;</span>snpc<span style="color:#eceff4">;</span> s<span style="color:#81a1c1">-&gt;</span>dnpc <span style="color:#81a1c1">=</span> s<span style="color:#81a1c1">-&gt;</span>pc <span style="color:#81a1c1">+</span> imm<span style="color:#eceff4">);</span>
+</span></span></code></pre></div><p>同时根据<code>J</code>型指令的格式，可以写出<code>J</code>型指令的立即数表示</p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#5e81ac;font-style:italic">#define immJ() do { \
+</span></span></span><span style="display:flex;"><span><span style="color:#5e81ac;font-style:italic">  *imm = (SEXT(BITS(i, 31, 31), 1) &lt;&lt; 20) | \
+</span></span></span><span style="display:flex;"><span><span style="color:#5e81ac;font-style:italic">         (BITS(i, 30, 21) &lt;&lt; 1) | \
+</span></span></span><span style="display:flex;"><span><span style="color:#5e81ac;font-style:italic">         (BITS(i, 20, 20) &lt;&lt; 11) | \
+</span></span></span><span style="display:flex;"><span><span style="color:#5e81ac;font-style:italic">         (BITS(i, 19, 12) &lt;&lt; 12); \
+</span></span></span><span style="display:flex;"><span><span style="color:#5e81ac;font-style:italic">} while(0)
+</span></span></span></code></pre></div><p><code>ret</code> 是对指令 <code>jalr x0, ra, 0</code> 的一种伪指令表示，所以需要实现<code>jalr</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#88c0d0">INSTPAT</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;??????? ????? ????? 000 ????? 11001 11&#34;</span><span style="color:#eceff4">,</span> jalr   <span style="color:#eceff4">,</span> I<span style="color:#eceff4">,</span> <span style="color:#88c0d0">R</span><span style="color:#eceff4">(</span>rd<span style="color:#eceff4">)</span> <span style="color:#81a1c1">=</span> s<span style="color:#81a1c1">-&gt;</span>snpc<span style="color:#eceff4">;</span> s<span style="color:#81a1c1">-&gt;</span>dnpc <span style="color:#81a1c1">=</span> src1 <span style="color:#81a1c1">+</span> imm<span style="color:#eceff4">);</span>
+</span></span></code></pre></div><p><code>sw</code>是存储字指令，将寄存器 <code>rs2</code> 中的字（4字节）存储到地址 <code>rs1 + imm</code>。<code>M[rs1+imm][0:31] = rs2[0:31]</code></p>
+<div class="highlight"><pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#88c0d0">INSTPAT</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;??????? ????? ????? 010 ????? 01000 11&#34;</span><span style="color:#eceff4">,</span> sw     <span style="color:#eceff4">,</span> S<span style="color:#eceff4">,</span> <span style="color:#88c0d0">Mw</span><span style="color:#eceff4">(</span>src1 <span style="color:#81a1c1">+</span> imm<span style="color:#eceff4">,</span> <span style="color:#b48ead">4</span><span style="color:#eceff4">,</span> src2<span style="color:#eceff4">));</span>
+</span></span></code></pre></div><p><code>mv</code>也是一个伪指令，<code>mv rd, rs</code> 的作用是：将寄存器 <code>rs</code> 的值复制到寄存器 <code>rd</code> 中，等效于<code>addi rd, rs, 0</code></p>
+<p>补全上述指令后即可通过<code>dummy.c</code>测试</p>
+<p><img loading="lazy" src="images/9.png" alt="image-9"  />
+</p>
+<p>其他测试大同小异，可自行实现</p>
+<p>PA 2-1 结束</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="next" href="https://Yang2KF.github.io/posts/ics_pa_1-3/">
+    <span class="title">Next »</span>
+    <br>
+    <span>ICS PA 1-3 监视点</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2024 <a href="https://Yang2KF.github.io/">Yang2KF&#39;s blog</a></span> · 
+    <span xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
+        Licensed under
+        <a
+          href="http://creativecommons.org/licenses/by-nc-sa/4.0/?ref=chooser-v1"
+          target="_blank"
+          rel="license noopener noreferrer"
+          style="display:inline-block;"
+          >CC BY-NC-SA 4.0 </a>
+    </span>
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+<script>
+    (function(u, c) {
+      var d = document, t = 'script', o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function(e) { c(e); }); }
+      s.parentNode.insertBefore(o, s);
+    })('//cdn.bootcss.com/pangu/4.0.7/pangu.min.js', function() {
+      pangu.spacingPage();
+    });
+</script>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

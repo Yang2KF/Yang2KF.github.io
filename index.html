@@ -167,6 +167,33 @@
 
 <article class="post-entry"> 
   <header class="entry-header">
+    <h2 class="entry-hint-parent">ICS PA 2-1 RTFSC(2)
+    </h2>
+  </header>
+  <div class="entry-content">
+    <p>本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。
+指令执行过程 execute()模拟了cpu的运行过程
+传入decode和此时的pc，由于不同isa执行过程可能不同，所以单独抽象出一个函数isa_exec_once()以屏蔽isa之间的差异
+取出的指令存入结构体s
+进入取指阶段
+此时操作的是snpc，直接将映射在虚拟地址中的指令取出，并将snpc指向下一条指令的内存地址
+由于riscv32为定长指令，所以长度固定位4字节
+映射的虚拟地址实际还是会访问真实的物理地址
+之后就将取出的指令返回，取出的指令将会存储在Decode结构体中。
+进入译码阶段，将s传入
+将snpc赋值给dnpc，如果后续没有跳转指令，则snpc与dnpc相等，否则需要修改dnpc
+之后开始进行模式匹配，可使用宏展开清晰看出执行过程
+利用makefile进行宏展开 preprocess: $(SRCS) @echo &#34;Running preprocessor for source files...&#34; @mkdir -p $(BUILD_DIR)/preprocessed @for src in $^; do \ echo &#34;&#43; Preprocessing $$src&#34;; \ $(CC) $(CFLAGS) -E $$src -o $(BUILD_DIR)/preprocessed/$$(basename $$src).i; \ echo &#34;Preprocessed output saved to $(BUILD_DIR)/preprocessed/$$(basename $$src).i&#34;; \ done Makefile 中的换行符会终止当前命令，因此必须用 \ 进行换行转义。
+补全指令 宏解析 先来看比较重要的几个宏
+#define BITMASK(bits) ((1ull &lt;&lt; (bits)) - 1) #define BITS(x, hi, lo) (((x) &gt;&gt; (lo)) &amp; BITMASK((hi) - (lo) &#43; 1)) // similar to x[hi:lo] in verilog #define SEXT(x, len) ({ struct { int64_t n : len; } __x = { .n = x }; (uint64_t)__x.n; }) BITMASK将数值为1的无符号长整形左移bits位再减1，即可生成一个bits&#43;1位为0，其余全为1的掩码
+...</p>
+  </div>
+  <footer class="entry-footer"><span title='2024-11-19 12:15:38 +0800 CST'>November 19, 2024</span>&nbsp;·&nbsp;2 min</footer>
+  <a class="entry-link" aria-label="post link to ICS PA 2-1 RTFSC(2)" href="https://Yang2KF.github.io/posts/ics_pa_2-1/"></a>
+</article>
+
+<article class="post-entry"> 
+  <header class="entry-header">
     <h2 class="entry-hint-parent">ICS PA 1-3 监视点
     </h2>
   </header>
@@ -174,10 +201,12 @@
     <p>本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。
 扩展表达式求值 由于之前已经打好了大的框架，剩下的这些实现起来都很简单，对于像==，&amp;&amp;，!=这些二元运算符，将其添加到之前处理加减乘除的位置即可；对于指针解引用，寄存器的识别，跟之前的负号处理基本一致
 这里针对寄存器，可以将$看作是一个一元运算符，也可以像我这样直接在make_token()函数中提前处理好
-switch (rules[i].token_type) { case TK_NUM: case TK_HEX: strncpy(tokens[nr_token].str, substr_start, substr_len); tokens[nr_token].str[substr_len] = &#39;\0&#39;; break; case TK_REG: strncpy(tokens[nr_token].str, substr_start &#43; 1, substr_len - 1); // skip the &#34;$&#34; tokens[nr_token].str[substr_len] = &#39;\0&#39;; break; } 识别成功后直接将$符号后的寄存器名称存入token 获取寄存器的值不多说，直接返回cpu.gpr[i]即可
+switch (rules[i].token_type) { case TK_NUM: case TK_HEX: strncpy(tokens[nr_token].str, substr_start, substr_len); tokens[nr_token].str[substr_len] = &#39;\0&#39;; break; case TK_REG: strncpy(tokens[nr_token].str, substr_start &#43; 1, substr_len - 1); // skip the &#34;$&#34; tokens[nr_token].str[substr_len] = &#39;\0&#39;; break; } 识别成功后直接将$符号后的寄存器名称存入token
+获取寄存器的值不多说，直接返回cpu.gpr[i]即可
 实现监视点 首先补全框架提供的两个函数，其实就是基础的链表插入删除操作
 WP* new_wp() { if(free_ != NULL) { WP *wp = free_; free_ = free_-&gt;next; wp-&gt;next = head; head = wp; return head; } else assert(0); } 这里我将free_wp()的参数修改为了监视点的编号，方便后续调用
-void free_wp(int no) { WP *cur = head; WP *pre = NULL; /*find the target watch point*/ while(cur != NULL) { if(cur-&gt;NO == no) { break; } pre = cur; cur = cur-&gt;next; } /*move it form head to free_*/ if(cur != NULL) { if(pre != NULL) { pre-&gt;next = cur-&gt;next; } else head = cur-&gt;next; } cur-&gt;next = free_; free_ = cur; } 为了能够实现监视点的作用，如打印旧的值，我们还需要在监视点结构中加入几个成员变量expr，old 并且要接收从new_wp()函数中返回来的空闲监视点，并设置相应数据，需要新建一个函数配合
+void free_wp(int no) { WP *cur = head; WP *pre = NULL; /*find the target watch point*/ while(cur != NULL) { if(cur-&gt;NO == no) { break; } pre = cur; cur = cur-&gt;next; } /*move it form head to free_*/ if(cur != NULL) { if(pre != NULL) { pre-&gt;next = cur-&gt;next; } else head = cur-&gt;next; } cur-&gt;next = free_; free_ = cur; } 为了能够实现监视点的记录信息的功能，还需要在监视点结构中加入几个成员变量expr，old，expr记录监视点的表达式，old则记录旧值
+同时为了接收从new_wp()函数中返回来的空闲监视点并记录相应数据，需要新建一个函数配合
 ...</p>
   </div>
   <footer class="entry-footer"><span title='2024-11-12 22:53:05 +0800 CST'>November 12, 2024</span>&nbsp;·&nbsp;2 min</footer>
@@ -252,7 +281,15 @@ theme: &#39;PaperMod&#39; 最后建议将此本地仓库push至github进行版�
     
 <footer class="footer">
         <span>&copy; 2024 <a href="https://Yang2KF.github.io/">Yang2KF&#39;s blog</a></span> · 
-
+    <span xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/">
+        Licensed under
+        <a
+          href="http://creativecommons.org/licenses/by-nc-sa/4.0/?ref=chooser-v1"
+          target="_blank"
+          rel="license noopener noreferrer"
+          style="display:inline-block;"
+          >CC BY-NC-SA 4.0 </a>
+    </span>
     <span>
         Powered by
         <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &

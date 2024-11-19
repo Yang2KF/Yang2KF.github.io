@@ -6,8 +6,60 @@
     <description>Recent content on Yang2KF&#39;s blog</description>
     <generator>Hugo -- 0.138.0</generator>
     <language>en-us</language>
-    <lastBuildDate>Tue, 12 Nov 2024 22:53:05 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 19 Nov 2024 12:15:38 +0800</lastBuildDate>
     <atom:link href="https://Yang2KF.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>ICS PA 2-1 RTFSC(2)</title>
+      <link>https://Yang2KF.github.io/posts/ics_pa_2-1/</link>
+      <pubDate>Tue, 19 Nov 2024 12:15:38 +0800</pubDate>
+      <guid>https://Yang2KF.github.io/posts/ics_pa_2-1/</guid>
+      <description>&lt;p&gt;本人仅为兴趣使然记录过程，请尊重手册上的学术诚信条目。&lt;/p&gt;
+&lt;h2 id=&#34;指令执行过程&#34;&gt;指令执行过程&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;execute()&lt;/code&gt;模拟了cpu的运行过程&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;images/1.png&#34; alt=&#34;image-1&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;传入&lt;code&gt;decode&lt;/code&gt;和此时的&lt;code&gt;pc&lt;/code&gt;，由于不同&lt;code&gt;isa&lt;/code&gt;执行过程可能不同，所以单独抽象出一个函数&lt;code&gt;isa_exec_once()&lt;/code&gt;以屏蔽isa之间的差异&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;images/2.png&#34; alt=&#34;image-2&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;取出的指令存入结构体&lt;code&gt;s&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;images/3.png&#34; alt=&#34;image-3&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;进入取指阶段&lt;/p&gt;
+&lt;p&gt;此时操作的是&lt;code&gt;snpc&lt;/code&gt;，直接将映射在虚拟地址中的指令取出，并将&lt;code&gt;snpc&lt;/code&gt;指向下一条指令的内存地址&lt;/p&gt;
+&lt;p&gt;由于&lt;strong&gt;riscv32&lt;/strong&gt;为定长指令，所以长度固定位4字节&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;images/4.png&#34; alt=&#34;image-4&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;映射的虚拟地址实际还是会访问真实的物理地址&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;images/5.png&#34; alt=&#34;image-5&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;之后就将取出的指令返回，取出的指令将会存储在&lt;code&gt;Decode&lt;/code&gt;结构体中。&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;images/6.png&#34; alt=&#34;image-6&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;进入译码阶段，将&lt;code&gt;s&lt;/code&gt;传入&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;images/7.png&#34; alt=&#34;image-7&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;&lt;img loading=&#34;lazy&#34; src=&#34;images/8.png&#34; alt=&#34;image-8&#34;  /&gt;
+&lt;/p&gt;
+&lt;p&gt;将&lt;code&gt;snpc&lt;/code&gt;赋值给&lt;code&gt;dnpc&lt;/code&gt;，如果后续没有跳转指令，则&lt;code&gt;snp&lt;/code&gt;c与&lt;code&gt;dnpc&lt;/code&gt;相等，否则需要修改&lt;code&gt;dnpc&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;之后开始进行模式匹配，可使用宏展开清晰看出执行过程&lt;/p&gt;
+&lt;h2 id=&#34;利用makefile进行宏展开&#34;&gt;利用makefile进行宏展开&lt;/h2&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-makefile&#34; data-lang=&#34;makefile&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#88c0d0&#34;&gt;preprocess&lt;/span&gt;&lt;span style=&#34;color:#81a1c1&#34;&gt;:&lt;/span&gt; &lt;span style=&#34;color:#81a1c1;font-weight:bold&#34;&gt;$(&lt;/span&gt;SRCS&lt;span style=&#34;color:#81a1c1;font-weight:bold&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	@echo &lt;span style=&#34;color:#a3be8c&#34;&gt;&amp;#34;Running preprocessor for source files...&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	@mkdir -p &lt;span style=&#34;color:#81a1c1;font-weight:bold&#34;&gt;$(&lt;/span&gt;BUILD_DIR&lt;span style=&#34;color:#81a1c1;font-weight:bold&#34;&gt;)&lt;/span&gt;/preprocessed
+&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;	@for src in $^&lt;span style=&#34;color:#eceff4&#34;&gt;;&lt;/span&gt; &lt;span style=&#34;color:#81a1c1;font-weight:bold&#34;&gt;do&lt;/span&gt; &lt;span style=&#34;color:#ebcb8b&#34;&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ebcb8b&#34;&gt;&lt;/span&gt;	    &lt;span style=&#34;color:#81a1c1&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#a3be8c&#34;&gt;&amp;#34;+ Preprocessing &lt;/span&gt;$$&lt;span style=&#34;color:#a3be8c&#34;&gt;src&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#eceff4&#34;&gt;;&lt;/span&gt; &lt;span style=&#34;color:#ebcb8b&#34;&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ebcb8b&#34;&gt;&lt;/span&gt;	    &lt;span style=&#34;color:#81a1c1;font-weight:bold&#34;&gt;$(&lt;/span&gt;CC&lt;span style=&#34;color:#81a1c1;font-weight:bold&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color:#81a1c1;font-weight:bold&#34;&gt;$(&lt;/span&gt;CFLAGS&lt;span style=&#34;color:#81a1c1;font-weight:bold&#34;&gt;)&lt;/span&gt; -E $$src -o &lt;span style=&#34;color:#81a1c1;font-weight:bold&#34;&gt;$(&lt;/span&gt;BUILD_DIR&lt;span style=&#34;color:#81a1c1;font-weight:bold&#34;&gt;)&lt;/span&gt;/preprocessed/$$&lt;span style=&#34;color:#81a1c1&#34;&gt;(&lt;/span&gt;basename $$src&lt;span style=&#34;color:#81a1c1&#34;&gt;)&lt;/span&gt;.i&lt;span style=&#34;color:#eceff4&#34;&gt;;&lt;/span&gt; &lt;span style=&#34;color:#ebcb8b&#34;&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ebcb8b&#34;&gt;&lt;/span&gt;	    &lt;span style=&#34;color:#81a1c1&#34;&gt;echo&lt;/span&gt; &lt;span style=&#34;color:#a3be8c&#34;&gt;&amp;#34;Preprocessed output saved to &lt;/span&gt;&lt;span style=&#34;color:#81a1c1;font-weight:bold&#34;&gt;$(&lt;/span&gt;BUILD_DIR&lt;span style=&#34;color:#81a1c1;font-weight:bold&#34;&gt;)&lt;/span&gt;&lt;span style=&#34;color:#a3be8c&#34;&gt;/preprocessed/&lt;/span&gt;$$&lt;span style=&#34;color:#a3be8c&#34;&gt;(basename &lt;/span&gt;$$&lt;span style=&#34;color:#a3be8c&#34;&gt;src).i&amp;#34;&lt;/span&gt;&lt;span style=&#34;color:#eceff4&#34;&gt;;&lt;/span&gt; &lt;span style=&#34;color:#ebcb8b&#34;&gt;\
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#ebcb8b&#34;&gt;&lt;/span&gt;	&lt;span style=&#34;color:#81a1c1;font-weight:bold&#34;&gt;done&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Makefile 中的换行符会终止当前命令，因此必须用 &lt;code&gt;\&lt;/code&gt; 进行换行转义。&lt;/p&gt;
+&lt;h2 id=&#34;补全指令&#34;&gt;补全指令&lt;/h2&gt;
+&lt;h3 id=&#34;宏解析&#34;&gt;宏解析&lt;/h3&gt;
+&lt;p&gt;先来看比较重要的几个宏&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-c&#34; data-lang=&#34;c&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#5e81ac;font-style:italic&#34;&gt;#define BITMASK(bits) ((1ull &amp;lt;&amp;lt; (bits)) - 1)
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#5e81ac;font-style:italic&#34;&gt;#define BITS(x, hi, lo) (((x) &amp;gt;&amp;gt; (lo)) &amp;amp; BITMASK((hi) - (lo) + 1)) &lt;/span&gt;&lt;span style=&#34;color:#616e87;font-style:italic&#34;&gt;// similar to x[hi:lo] in verilog
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#616e87;font-style:italic&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#5e81ac;font-style:italic&#34;&gt;#define SEXT(x, len) ({ struct { int64_t n : len; } __x = { .n = x }; (uint64_t)__x.n; })
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;&lt;code&gt;BITMASK&lt;/code&gt;将数值为1的无符号长整形左移&lt;code&gt;bits&lt;/code&gt;位再减1，即可生成一个&lt;code&gt;bits+1&lt;/code&gt;位为0，其余全为1的掩码&lt;/p&gt;</description>
+    </item>
     <item>
       <title>ICS PA 1-3 监视点</title>
       <link>https://Yang2KF.github.io/posts/ics_pa_1-3/</link>
@@ -28,7 +80,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#616e87;font-style:italic&#34;&gt;&lt;/span&gt;        tokens&lt;span style=&#34;color:#eceff4&#34;&gt;[&lt;/span&gt;nr_token&lt;span style=&#34;color:#eceff4&#34;&gt;].&lt;/span&gt;str&lt;span style=&#34;color:#eceff4&#34;&gt;[&lt;/span&gt;substr_len&lt;span style=&#34;color:#eceff4&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color:#81a1c1&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color:#a3be8c&#34;&gt;&amp;#39;\0&amp;#39;&lt;/span&gt;&lt;span style=&#34;color:#eceff4&#34;&gt;;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;        &lt;span style=&#34;color:#81a1c1;font-weight:bold&#34;&gt;break&lt;/span&gt;&lt;span style=&#34;color:#eceff4&#34;&gt;;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#eceff4&#34;&gt;}&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;识别成功后直接将&lt;code&gt;$&lt;/code&gt;符号后的寄存器名称存入&lt;code&gt;token&lt;/code&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;识别成功后直接将&lt;code&gt;$&lt;/code&gt;符号后的寄存器名称存入&lt;code&gt;token&lt;/code&gt;&lt;br&gt;
 获取寄存器的值不多说，直接返回&lt;code&gt;cpu.gpr[i]&lt;/code&gt;即可&lt;/p&gt;
 &lt;h2 id=&#34;实现监视点&#34;&gt;实现监视点&lt;/h2&gt;
 &lt;p&gt;首先补全框架提供的两个函数，其实就是基础的链表插入删除操作&lt;/p&gt;
@@ -68,8 +120,8 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  cur&lt;span style=&#34;color:#81a1c1&#34;&gt;-&amp;gt;&lt;/span&gt;next &lt;span style=&#34;color:#81a1c1&#34;&gt;=&lt;/span&gt; free_&lt;span style=&#34;color:#eceff4&#34;&gt;;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;  free_ &lt;span style=&#34;color:#81a1c1&#34;&gt;=&lt;/span&gt; cur&lt;span style=&#34;color:#eceff4&#34;&gt;;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;&lt;span style=&#34;color:#eceff4&#34;&gt;}&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;为了能够实现监视点的作用，如打印旧的值，我们还需要在监视点结构中加入几个成员变量&lt;code&gt;expr&lt;/code&gt;，&lt;code&gt;old&lt;/code&gt;
-并且要接收从&lt;code&gt;new_wp()&lt;/code&gt;函数中返回来的空闲监视点，并设置相应数据，需要新建一个函数配合&lt;/p&gt;</description>
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;为了能够实现监视点的记录信息的功能，还需要在监视点结构中加入几个成员变量&lt;code&gt;expr&lt;/code&gt;，&lt;code&gt;old&lt;/code&gt;，&lt;code&gt;expr&lt;/code&gt;记录监视点的表达式，&lt;code&gt;old&lt;/code&gt;则记录旧值&lt;br&gt;
+同时为了接收从&lt;code&gt;new_wp()&lt;/code&gt;函数中返回来的空闲监视点并记录相应数据，需要新建一个函数配合&lt;/p&gt;</description>
     </item>
     <item>
       <title>ICS PA 1-2 表达式求值</title>
@@ -216,7 +268,7 @@
 &lt;p&gt;为避免本地仓库与远程仓库分支名称不一致的冲突，建议将git主分支名称设置为&lt;code&gt;main&lt;/code&gt;，与GitHub默认主分支名称保持一致&lt;/p&gt;
 &lt;p&gt;首先将根目录初始化为本地git仓库&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git init
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;访问官方主题网站：&lt;a href=&#34;https://themes.gohugo.io/&#34;&gt;https://themes.gohugo.io/&lt;/a&gt;&lt;br&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;访问官方主题网站：&lt;a href=&#34;https://themes.gohugo.io/&#34; target=&#34;_blank&#34; rel=&#34;noopener&#34; style=&#34;color:#0366D6&#34;;&gt;https://themes.gohugo.io/&lt;/a&gt;&lt;br&gt;
 选择你所喜欢的主题，不同主题安装方式可能略有不同，请参照主题主页的文档，此处以&lt;strong&gt;PaperMod&lt;/strong&gt;为例&lt;/p&gt;
 &lt;p&gt;在根目录下执行该命令，即将该仓库作为本地仓库的子模块&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; style=&#34;color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;&#34;&gt;&lt;code class=&#34;language-bash&#34; data-lang=&#34;bash&#34;&gt;&lt;span style=&#34;display:flex;&#34;&gt;&lt;span&gt;git submodule add --depth&lt;span style=&#34;color:#81a1c1&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#b48ead&#34;&gt;1&lt;/span&gt; https://github.com/adityatelange/hugo-PaperMod.git themes/PaperMod
